@@ -3,10 +3,9 @@ extends Reference
 
 var Tokenizer = preload('./Tokenizer.gd')
 var AST = preload('./AST/AST.gd')
+var EXPAST = preload('res://compiler/AST/EXPAST.gd')
 
 var tokenizer
-
-var ast
 
 var preserved_id = ['import', 'name', 'subtree', 'tree']
 
@@ -82,14 +81,13 @@ var has_tree
 #----- Methods -----
 func init(t):
 	tokenizer = t
-	ast = null
 	
 
 func parse():
 	tokenizer.init(tokenizer.source)
 	has_tree = false
 	
-	ast = AST.new()
+	var ast = AST.new()
 	
 	_bt_file(ast)
 	
@@ -106,6 +104,7 @@ func parse():
 	if not has_tree:
 		error(token, 'tree')
 	
+	return ast
 
 func match_blank():
 	var token = tokenizer.preview_next()
@@ -261,7 +260,7 @@ func error(token, expect = ''):
 	var e_locate = ''
 	for i in range(token.start - token.last_line_break):
 		e_locate += ' ' if tokenizer.source.ord_at(token.start+i) < 128 else '  '
-	for i in range(token.length-1):
+	for _i in range(token.length-1):
 		e_locate += '~'
 	e_locate += '^'
 	
@@ -458,89 +457,144 @@ func _parameter():
 	match_value(':')
 	match_blank_or_null()
 	print('exp: [')
-	_exp()
+	parameter.exp_node = _exp()
 	print(']')
+	
+	return parameter
 
 func _exp():
-	_e1()
+	var left_exp_node = _e1()
 	var token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
 	while token.type == Tokenizer.Token.OPERATOR and (token.value == '+' or token.value == '-'):
+		var op_node = EXPAST.OperatorNode.new()
+		
 		match_blank_or_null()
 		var op_token = match_operator()
+		op_node.op = op_token
 		print(op_token.value)
+		
 		match_blank_or_null()
-		_e1()
+		var right_exp_node = _e1()
+		
+		op_node.children = [left_exp_node, right_exp_node]
+		left_exp_node = op_node
+		
 		token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
+	return left_exp_node
 
 func _e1():
-	_e2()
+	var left_exp_node = _e2()
 	var token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
 	while token.type == Tokenizer.Token.OPERATOR and (token.value == '*' or token.value == '/'):
+		var op_node = EXPAST.OperatorNode.new()
+		
 		match_blank_or_null()
 		var op_token = match_operator()
+		op_node.op = op_token
 		print(op_token.value)
+		
+		
 		match_blank_or_null()
-		_e2()
+		var right_exp_node = _e2()
+		
+		op_node.children = [left_exp_node, right_exp_node]
+		left_exp_node = op_node
+		
 		token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
+	return left_exp_node
+
 
 func _e2():
+	var exp_node = null
+	
 	var token = tokenizer.preview_next()
 	if token.type == Tokenizer.Token.OPERATOR and (token.value == '-' or token.value == '+'):
+		exp_node = EXPAST.OperatorNode.new()
+		
 		var op_token = match_operator()
+		exp_node.op = op_token
 		print(op_token.value)
-	_e3()
+	
+	var e3 = _e3()
+	if exp_node:
+		exp_node.children.append(e3)
+	else:
+		exp_node = e3
+	
+	return exp_node
 
 func _e3():
+	var exp_node = null
+	
 	var token = tokenizer.preview_next()
 	if token.type == Tokenizer.Token.ID:
 		token = tokenizer.preview_next(2)
 		if token.type == Tokenizer.Token.LEFT_CLOSURE and token.value == '(':
-			_func()
+			exp_node = _func()
 		else:
 			var id_token = match_id()
 			print(id_token)
+			exp_node = EXPAST.LeafNode.new()
+			exp_node.token = id_token
 	elif token.type == Tokenizer.Token.STRING:
 		var string_token = match_string()
 		print(string_token)
+		exp_node = EXPAST.LeafNode.new()
+		exp_node.token = string_token
 	elif token.type == Tokenizer.Token.NUMBER:
 		var number_token = match_number()
 		print(number_token)
+		exp_node = EXPAST.LeafNode.new()
+		exp_node.token = number_token
 	elif token.type == Tokenizer.Token.BOOL:
 		var bool_token = match_bool()
 		print(bool_token)
+		exp_node = EXPAST.LeafNode.new()
+		exp_node.token = bool_token
 	elif token.type == Tokenizer.Token.LEFT_CLOSURE and token.value == '(':
 		print('(')
 		match_value('(')
 		match_blank_or_null()
-		_exp()
+		exp_node = _exp()
 		match_blank_or_null()
 		match_value(')')
 		print(')')
 	elif token.type == Tokenizer.Token.OPERATOR and token.value == '$':
 		print('$')
-		_name()
+		exp_node = _name()
+	
+	return exp_node
 
 func _func():
+	var func_node = EXPAST.FuncNode.new()
+	
 	var id_token = match_id()
 	print('%s|(' % id_token.value)
+	func_node.id = id_token
+	
 	match_value('(')
 	var token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
 	if token.type != Tokenizer.Token.RIGHT_CLOSURE or token.value != ')':
 		match_blank_or_null()
-		_arg_part()
+		_arg_part(func_node)
 	match_blank_or_null()
 	match_value(')')
 	print(')|')
+	
+	return func_node
 
-func _arg_part():
-	_exp()
+func _arg_part(func_node):
+	var exp_node = _exp()
+	func_node.children.append(exp_node)
+	
 	var token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
 	while token.type == Tokenizer.Token.COMMAS:
 		match_blank_or_null()
 		match_value(',')
 		print(',')
 		match_blank_or_null()
-		_exp()
+		exp_node = _exp()
+		func_node.children.append(exp_node)
 		token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
 	
 	
