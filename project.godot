@@ -159,6 +159,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Behavior Tree Syntax Compiler"
+run/main_scene="res://TestScene.tscn"
 config/icon="res://icon.png"
 
 [debug]
