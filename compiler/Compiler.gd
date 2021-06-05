@@ -425,6 +425,7 @@ func compile_tree(tree_statement):
 		i += 1
 		
 	
+	# clean up
 	if has_error:
 		for n in created_node_list:
 			if is_instance_valid(n):
@@ -449,6 +450,19 @@ func gen_tree_node_stack_element(i, n):
 # no args
 func gen_bt_node_from_task(task):
 	if task.name.is_subtree_ref:
+		if symbol_table.has(task.name.name.value):
+			var symbol = symbol_table[task.name.name.value]
+			if symbol.get_class() == 'SubtreeSymbol':
+				var bt = compile_tree(symbol.subtree)
+				if has_error:
+					if is_instance_valid(bt):
+						bt.queue_free()
+					return null
+				return bt
+			else:
+				error(IncompatibleIDError.new(task.name.name))
+		else:
+			error(UndefinedIDError.new(task.name.name))
 		return null
 	if task.name.name.type == Tokenizer.Token.ID:
 		if symbol_table.has(task.name.name.value):

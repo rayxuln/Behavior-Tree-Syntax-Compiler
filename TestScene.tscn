@@ -52,7 +52,7 @@ subtree name: print_123
 
 tree
 	sequence
-		#$print_123
+		$print_123
 		timer wait: 1
 		print msg:'a'
 		timer wait: 1
