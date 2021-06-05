@@ -25,7 +25,7 @@ class Parameter:
 	extends Reference
 	
 	var id # token
-	var value # EXP tree node
+	var exp_node # EXP tree node
 	
 	
 

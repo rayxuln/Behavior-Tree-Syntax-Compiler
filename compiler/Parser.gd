@@ -355,79 +355,86 @@ func _tree_node_part(tree):
 	var preview_pos = get_indent_token_with_ID_followed()
 	while preview_pos != -1:
 		match_line_break_or_comment_or_indent_with_comment_or_null()
-		_tree_node_statement(tree)
+		var tree_node = _tree_node_statement()
+		tree.tree_node_list.append(tree_node)
 		tree_node_cnt += 1
 		preview_pos = get_indent_token_with_ID_followed()
 	if tree_node_cnt == 0:
 		printerr('Empty tree.')
 
-func _tree_node_statement(tree):
+func _tree_node_statement():
 	var tree_node = AST.TreeNode.new()
-	tree.tree_node_list.append(tree_node)
-	
-	tree_node.task = AST.Task.new()
 	
 	print('{')
 	var indent_token = match_indent()
-	tree.indent = indent_token
+	tree_node.indent = indent_token
 	var token = tokenizer.preview_next()
 	if token.type == Tokenizer.Token.LEFT_CLOSURE and token.value == '(':
 		_guard_part(tree_node)
 		match_blank_or_null()
-	_task(tree_node.task)
+	tree_node.task = _task()
 	match_blank_or_null()
 	match_comment_or_null()
 	print('}')
+	
+	return tree_node
 
 func _guard_part(tree_node):
 	var exclude = [Tokenizer.Token.BLANK]
 	var token = tokenizer.preview_next_without(exclude)
 	while token.type == Tokenizer.Token.LEFT_CLOSURE and token.value == '(':
 		match_blank_or_null()
-		_guard(tree_node)
+		var task = _guard()
+		tree_node.guard_list.append(task)
 		token = tokenizer.preview_next_without(exclude)
 
-func _guard(tree_node):
-	var guard = AST.Task.new()
-	tree_node.guard_list.append(guard)
-	
+func _guard():
 	match_value('(')
 	print('(')
 	match_blank_or_null()
-	_task(guard)
+	var task = _task()
 	match_blank_or_null()
 	print(')')
 	match_value(')')
+	
+	return task
 
-func _task(task):
-	_name(task)
+func _task():
+	var task = AST.Task.new()
+	
+	var name = _name()
+	task.name = name
+	
 	var exclude = [Tokenizer.Token.BLANK]
 	var token = tokenizer.preview_next_without(exclude)
 	if token.type == Tokenizer.Token.ID:
 		print('-[')
 		_parameter_part(task)
 		print(']-')
+	
+	return task
 
-func _name(task):
-	task.name = AST.Name.new()
-	task.name.is_subtree_ref = false
+func _name():
+	var name = AST.Name.new()
+	name.is_subtree_ref = false
 	
 	var token = tokenizer.preview_next()
 	if token.type == Tokenizer.Token.OPERATOR and token.value == '$':
-		task.name.is_subtree_ref = true
-		_subtree_ref(task.name)
+		_subtree_ref(name)
 	elif token.type == Tokenizer.Token.ID:
 		var id_token = match_id()
-		task.name.name = id_token
+		name.name = id_token
 		print('buit-in name: %s' % id_token.value)
 	else:
 		var string_token = match_string()
-		task.name.name = string_token
+		name.name = string_token
 		print('string name: \'%s\'' % string_token.value)
 	
+	return name
 
 func _subtree_ref(name):
 	match_value('$')
+	name.is_subtree_ref = true
 	var id_token = match_id()
 	name.name = id_token
 	print('ref name: ' + id_token.value)
@@ -437,14 +444,15 @@ func _parameter_part(task):
 	var token = tokenizer.preview_next_without(exclude)
 	while token.type == Tokenizer.Token.ID:
 		match_blank()
-		_parameter(task)
+		var parameter = _parameter()
+		task.parameter_list.append(parameter)
 		token = tokenizer.preview_next_without(exclude)
 
-func _parameter(task):
+func _parameter():
 	var parameter = AST.Parameter.new()
-	task.parameter_list.append(parameter)
 	
 	var id_token = match_id()
+	parameter.id = id_token
 	print('param: ' + id_token.value)
 	match_blank_or_null()
 	match_value(':')
