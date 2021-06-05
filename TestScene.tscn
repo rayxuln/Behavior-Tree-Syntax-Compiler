@@ -45,7 +45,7 @@ text = "#
 import print:\"res://behavior_tree/lib/test/Print.gd\"
 
 subtree name: print_123
-	parallel
+	parallel orchestrator: JOIN
 		print msg: '1'
 		print msg: '2'
 		print msg: '3'

@@ -171,7 +171,8 @@ func exp_to_string(exp_node):
 	if exp_node is EXPAST.LeafNode:
 		return str(exp_node.token.value)
 	elif exp_node is EXPAST.OperatorNode:
-		return '(%s %s %s)' % [exp_to_string(exp_node.chidlren[0]), exp_node.op.value, exp_to_string(exp_node.chidlren[0])]
+		var children = exp_node.get('children')
+		return '(%s %s %s)' % [exp_to_string(children[0]), exp_node.op.value, exp_to_string(children[1])]
 	elif exp_node is EXPAST.FuncNode:
 		var arg_part = ''
 		var cnt = 0

@@ -484,6 +484,8 @@ func _parameter():
 	match_value(':')
 	match_blank_or_null()
 	parameter.exp_node = _exp()
+	if parameter.exp_node == null:
+		error(tokenizer.preview_next(), 'a expression')
 	
 	return parameter
 
@@ -583,6 +585,8 @@ func _e3():
 		match_value(')')
 	elif token.type == Tokenizer.Token.OPERATOR and token.value == '$':
 		exp_node = _name()
+	else:
+		error(token, 'a valid expression')
 	
 	return exp_node
 

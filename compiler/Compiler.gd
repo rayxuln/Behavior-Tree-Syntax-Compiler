@@ -22,6 +22,21 @@ extends Reference
 #            ....
 #
 
+#----- Lib -----
+func lib_add(a, b):
+	return a + b
+
+func lib_sub(a, b):
+	return a - b
+
+func lib_mult(a, b):
+	return a * b
+
+func lib_divide(a, b):
+	return a / b
+
+func lib_sin(x):
+	return sin(x)
 #----- Classes -----
 const Parser = preload('./Parser.gd')
 const Tokenizer = preload('./Tokenizer.gd')
@@ -53,6 +68,21 @@ class SubtreeSymbol:
 	
 	func get_class():
 		return 'SubtreeSymbol'
+
+class FuncSymbol:
+	extends Symbol
+	
+	var func_ref:FuncRef
+	var expected_arg_num:int
+	var is_op:bool
+	
+	func _init(f:FuncRef, n:int, op:bool=false) -> void:
+		func_ref = f
+		expected_arg_num = n
+		is_op = op
+	
+	func get_class():
+		return 'FuncSymbol'
 
 class ConstValueSymbol:
 	extends Symbol
@@ -199,7 +229,7 @@ class UndefinedParameterError:
 	extends Error
 	
 	func _init(id, param, t) -> void:
-		what = '\'%s\' does not have parameter \'%s\''
+		what = '\'%s\' does not have parameter \'%s\'' % [id, param]
 		relative_token = t
 	
 	func get_class():
@@ -247,6 +277,49 @@ class IncompatibleIndentError:
 	func get_class():
 		return 'IncompatibleIndentError'
 	
+
+class BrokenExpressionError:
+	extends Error
+	
+	func _init(t) -> void:
+		what = 'The expression is proken?'
+		relative_token = t
+	
+	func get_class():
+		return 'BrokenExpressionError'
+
+class UndefinedFunctionError:
+	extends Error
+	
+	func _init(f) -> void:
+		what = 'Function \'%s\' is undefined!' % f.value
+		relative_token = f
+	
+	func get_class():
+		return 'UndefinedFunctionError'
+	
+
+class UndefinedOperatorError:
+	extends Error
+	
+	func _init(f) -> void:
+		what = 'Operator \'%s\' is undefined!' % f.value
+		relative_token = f
+	
+	func get_class():
+		return 'UndefinedOperatorError'
+	
+
+class UnexpectedArgumentNumError:
+	extends Error
+	
+	func _init(id, expected, provided) -> void:
+		what = 'Function \'%s\' need %d arguments, but you\'ve provided %d.' % [id.value, expected, provided]
+		relative_token = id
+	
+	func get_class():
+		return 'UnexpectedArgumentNumError'
+	
 #----- Properties -----
 var symbol_table
 
@@ -284,10 +357,16 @@ func init():
 	add_const_symbol('until_fail', BuiltInBTNodeSymbol.new(BTDecoratorUntilFail))
 	add_const_symbol('until_success', BuiltInBTNodeSymbol.new(BTDecoratorUntilSuccess))
 	
-	add_const_symbol('SEQUENCE', ConstValueSymbol.new(0))
-	add_const_symbol('SELECTOR', ConstValueSymbol.new(1))
-	add_const_symbol('RESUME', ConstValueSymbol.new(0))
-	add_const_symbol('JOIN', ConstValueSymbol.new(1))
+	add_const_symbol('SEQUENCE', ConstValueSymbol.new(BTCompositeParallel.Policy.SEQUENCE))
+	add_const_symbol('SELECTOR', ConstValueSymbol.new(BTCompositeParallel.Policy.SELECTOR))
+	add_const_symbol('RESUME', ConstValueSymbol.new(BTCompositeParallel.Orchestrator.Resume))
+	add_const_symbol('JOIN', ConstValueSymbol.new(BTCompositeParallel.Orchestrator.Join))
+	
+	add_const_symbol('+', FuncSymbol.new(funcref(self, 'lib_add'), 2))
+	add_const_symbol('-', FuncSymbol.new(funcref(self, 'lib_sub'), 2))
+	add_const_symbol('*', FuncSymbol.new(funcref(self, 'lib_mult'), 2))
+	add_const_symbol('/', FuncSymbol.new(funcref(self, 'lib_divide'), 2))
+	add_const_symbol('sin', FuncSymbol.new(funcref(self, 'lib_sin'), 1))
 
 func add_importer(suffix:String, importer:Importer):
 	importer_table[suffix] = importer
@@ -482,8 +561,23 @@ func gen_tree_node_stack_element(i, n):
 		'node': n
 	}
 
-# no args
 func gen_bt_node_from_task(task):
+	# gen args
+	var args = []
+	for param in task.parameter_list:
+		var key = param.id.value
+		var value = calc_exp_node(param.id, param.exp_node)
+		args.append({
+			'key': key,
+			'value': value
+		})
+		if has_error:
+			break
+	
+	if has_error:
+		return null
+	
+	# gen task node
 	if task.name.is_subtree_ref:
 		if symbol_table.has(task.name.name.value):
 			var symbol = symbol_table[task.name.name.value]
@@ -503,7 +597,7 @@ func gen_bt_node_from_task(task):
 		if symbol_table.has(task.name.name.value):
 			var symbol = symbol_table[task.name.name.value]
 			if symbol.has_method('_Class_Type_BTNodeSymbol_'):
-				var n = symbol.create_node(self, task.name.name, [])
+				var n = symbol.create_node(self, task.name.name, args)
 				n.name = task.name.name.value
 				return n
 			else:
@@ -513,10 +607,59 @@ func gen_bt_node_from_task(task):
 	elif task.name.name.type == Tokenizer.Token.STRING:
 		var symbol = CustomBTNodeSymbol.new(self, task.name.name)
 		if symbol:
-			var n = symbol.create_node(self, task.name.name, [])
+			var n = symbol.create_node(self, task.name.name, args)
 			n.name = task.name.name.value
 			return n
 	return null
+
+func calc_exp_node(relative_token, exp_node):
+	match exp_node.get_class():
+		'OperatorNode':
+			if symbol_table.has(exp_node.op.value):
+				var symbol = symbol_table[exp_node.op.value]
+				if symbol.get_class() == 'FuncSymbol':
+					var l = calc_exp_node(relative_token, exp_node.children[0])
+					if has_error:
+						return null
+					var r = calc_exp_node(relative_token, exp_node.children[1])
+					if has_error:
+						return null
+					return symbol.func_ref.call_func(l, r)
+				else:
+					error(IncompatibleIDError.new(exp_node.op))
+			else:
+				error(UndefinedOperatorError.new(exp_node.op))
+		'FuncNode':
+			if symbol_table.has(exp_node.id.value):
+				var symbol = symbol_table[exp_node.id.value]
+				if symbol.get_class() == 'FuncSymbol':
+					var args = []
+					for c in exp_node.children:
+						var a = calc_exp_node(relative_token, c)
+						if has_error:
+							return null
+						args.append(a)
+					if args.size() != symbol.expected_arg_num:
+						error(UnexpectedArgumentNumError.new(exp_node.id, symbol.expected_arg_num, args.size()))
+						return null
+					return symbol.func_ref.call_funcv(args)
+				else:
+					error(IncompatibleIDError.new(exp_node.id))
+			else:
+				error(UndefinedFunctionError.new(exp_node.id))
+		'LeafNode':
+			match exp_node.token.type:
+				Tokenizer.Token.ID:
+					if symbol_table.has(exp_node.token.value):
+						var symbol = symbol_table[exp_node.token.value]
+						if symbol.get_class() == 'ConstValueSymbol':
+							return symbol.value
+						else:
+							error(IncompatibleIDError.new(exp_node.token))
+					else:
+						error(UndefinedIDError.new(exp_node.token))
+			return exp_node.token.value
+	error(BrokenExpressionError.new(relative_token))
 
 func error(e:Error):
 	has_error = true

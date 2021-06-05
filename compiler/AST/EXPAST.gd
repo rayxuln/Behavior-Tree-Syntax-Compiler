@@ -9,6 +9,8 @@ class EXPNode:
 	func execute(agent):
 		pass
 	
+	func get_class():
+		return 'EXPNode'
 
 class BranchNode:
 	extends EXPNode
@@ -18,26 +20,31 @@ class BranchNode:
 	func _init() -> void:
 		children = []
 	
+	func get_class():
+		return 'BranchNode'
 
 class OperatorNode:
 	extends BranchNode
 	
 	var op # token
 	
+	func get_class():
+		return 'OperatorNode'
 
 class FuncNode:
 	extends BranchNode
 	
 	var id # token
 	
+	func get_class():
+		return 'FuncNode'
 
 class LeafNode:
 	extends EXPNode
 	
 	var token
 	
+	func get_class():
+		return 'LeafNode'
 
-#----- Methods -----
-static func execute(lib_table:Dictionary, exp_node:EXPNode):
-	return 0
 
