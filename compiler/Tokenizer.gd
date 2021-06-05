@@ -30,6 +30,11 @@ var Indent_fstate_list
 
 var next_token_queue:Array
 
+var has_error:bool
+var is_print_error:bool = false
+var first_error:String
+var last_error:String
+
 enum TransitionConditionType {
 	FUNC,
 	CHAR,
@@ -137,6 +142,8 @@ func init(_s:String):
 	line_cnt = 0
 	last_line_break = -1
 	next_token_queue = []
+	
+	has_error = false
 	
 	ID_trans_table = {
 		0: [gen_transition(1, 'is_valid_char_without_digit', '<valid char and not digit>')],
@@ -336,7 +343,7 @@ func _get_next():
 				'column': column
 			}
 		])]
-		printerr(error)
+		_error(error)
 		return gen_token(Token.ERROR, error, column, 1, line_cnt, last_line_break)
 	
 	match res.status:
@@ -354,13 +361,13 @@ func _get_next():
 			token.last_line_break = last_line_break
 			return token
 		StateMachineResult.FAIL:
-			printerr(res.error)
+			_error(res.error)
 			return gen_token(Token.ERROR, res.error, next, 1, line_cnt, last_line_break)
 		StateMachineResult.EOF:
 			next = res.next
 			return gen_token(Token.EOF, '', next, 1, line_cnt, last_line_break)
 		_:
-			printerr('Undefined state machien result status!')
+			_error('Undefined state machien result status!')
 
 func run_state_machine(state, current_next, state_transition_table, final_state_list):
 	var all_condition_fail = false
@@ -514,3 +521,11 @@ func match_char(c):
 		return true
 	return false
 
+func _error(error):
+	if not has_error:
+		first_error = error
+	has_error = true
+	last_error = error
+	if is_print_error:
+		printerr(error)
+	

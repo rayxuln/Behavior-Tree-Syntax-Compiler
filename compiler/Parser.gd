@@ -12,7 +12,7 @@ var preserved_id = ['import', 'name', 'subtree', 'tree']
 var has_tree
 
 var has_error
-var is_print_error = true
+var is_print_error = false
 var fist_error:String = ''
 var last_error:String = ''
 

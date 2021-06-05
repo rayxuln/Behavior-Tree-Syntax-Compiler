@@ -16,18 +16,25 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HSplitContainer" type="HSplitContainer" parent="Control"]
+[node name="VSplitContainer" type="VSplitContainer" parent="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSplitContainer" type="HSplitContainer" parent="Control/VSplitContainer"]
+margin_right = 1024.0
+margin_bottom = 444.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 3.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Input" type="TextEdit" parent="Control/HSplitContainer"]
+[node name="Input" type="TextEdit" parent="Control/VSplitContainer/HSplitContainer"]
 margin_right = 506.0
-margin_bottom = 600.0
+margin_bottom = 444.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = SubResource( 1 )
@@ -63,10 +70,10 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Output" type="TextEdit" parent="Control/HSplitContainer"]
+[node name="Output" type="TextEdit" parent="Control/VSplitContainer/HSplitContainer"]
 margin_left = 518.0
 margin_right = 1024.0
-margin_bottom = 600.0
+margin_bottom = 444.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = SubResource( 1 )
@@ -78,4 +85,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="text_changed" from="Control/HSplitContainer/Input" to="." method="_on_Input_text_changed"]
+[node name="CenterContainer" type="CenterContainer" parent="Control/VSplitContainer"]
+margin_top = 456.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CompileButton" type="Button" parent="Control/VSplitContainer/CenterContainer"]
+margin_left = 479.0
+margin_top = 62.0
+margin_right = 544.0
+margin_bottom = 82.0
+text = "Compile"
+
+[connection signal="text_changed" from="Control/VSplitContainer/HSplitContainer/Input" to="." method="_on_Input_text_changed"]
+[connection signal="pressed" from="Control/VSplitContainer/CenterContainer/CompileButton" to="." method="_on_CompileButton_pressed"]
