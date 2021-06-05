@@ -10,6 +10,12 @@ func _ready() -> void:
 #	parser_test.run_tests()
 	$Control/VSplitContainer/HSplitContainer/Output.text = parser_test.prettify_bt($Control/VSplitContainer/HSplitContainer/Input.text)
 
+#---- Methods -----
+func set_children_owner(p:Node, o:Node):
+	for child in p.get_children():
+		child.owner = o
+		set_children_owner(child, o)
+	
 #---- Signals -----
 func _on_Input_text_changed() -> void:
 	$Control/VSplitContainer/HSplitContainer/Output.text = parser_test.prettify_bt($Control/VSplitContainer/HSplitContainer/Input.text)
@@ -18,7 +24,13 @@ func _on_Input_text_changed() -> void:
 func _on_CompileButton_pressed() -> void:
 	var c = Compiler.new()
 	c.init()
-	c.compile($Control/VSplitContainer/HSplitContainer/Input.text)
+	var bt = c.compile($Control/VSplitContainer/HSplitContainer/Input.text)
+	if bt == null:
+		return
+	set_children_owner(bt, bt)
 	
+	var ps = PackedScene.new()
+	ps.pack(bt)
 	
+	ResourceSaver.save('res://BT1.tscn', ps)
 	

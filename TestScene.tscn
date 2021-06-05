@@ -39,28 +39,27 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = SubResource( 1 )
 text = "#
-# 小狗的行为树
+# 测试输出
 #
 
-import 叫:\"res://dog/bt/BarkTask.gd\"
-import 摇摆:\"res://dog/bt/CareTask.gd\"
-import 标记:\"res://dog/bt/MarkTask.gd\"
-import 走:\"res://dog/bt/WalkTask.gd\"
+import print:\"res://behavior_tree/lib/test/Print.gd\"
 
-subtree name: 摇摆树
-	 parallel 										# 并行
-		  摇摆 次数:  3 							# 摇摆3次
-		   alwaysFail 								# 总是失败
-			    'res://dog/bt/RestTask' # 休息
+subtree name: print_123
+	parallel
+		print msg: '1'
+		print msg: '2'
+		print msg: '3'
 
 tree
-	selector											 # 选择
-		$摇摆树 										# 引用子树
-		sequence 									# 顺序
-			叫 次数: rand_rangei(1, 1)
-			走
-			\"res://dog/bt/BarkTask\"	 # 直接使用字符串也行
-			标记
+	sequence
+		#$print_123
+		timer wait: 1
+		print msg:'a'
+		timer wait: 1
+		random_selector
+			print msg: 'b'
+			print msg: 'c'
+		timer wait: 1
 	
 
 "

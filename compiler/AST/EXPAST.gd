@@ -37,5 +37,7 @@ class LeafNode:
 	var token
 	
 
-
+#----- Methods -----
+static func execute(lib_table:Dictionary, exp_node:EXPNode):
+	return 0
 

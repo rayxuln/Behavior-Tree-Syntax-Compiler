@@ -38,9 +38,32 @@ tree  #sds+
 """
 
 var source_2:String = """
+#
+# 小狗的行为树
+#
+
+import 叫:"res://dog/bt/BarkTask.gd"
+import 摇摆:"res://dog/bt/CareTask.gd"
+import 标记:"res://dog/bt/MarkTask.gd"
+import 走:"res://dog/bt/WalkTask.gd"
+
+subtree name: 摇摆树
+	parallel 										# 并行
+		摇摆 次数:  3 							# 摇摆3次
+		alwaysFail 								# 总是失败
+			'res://dog/bt/RestTask' # 休息
+
 tree
-	dynamicGuardSelector
-		()                             $actOnYourOwn  # fallback behavior (no guard)
+	selector											 # 选择
+		$摇摆树 										# 引用子树
+		sequence 									# 顺序
+			叫 次数: rand_rangei(1, 1)
+			走
+			"res://dog/bt/BarkTask"	 # 直接使用字符串也行
+			标记
+	
+
+
 """
 
 func get_name():
