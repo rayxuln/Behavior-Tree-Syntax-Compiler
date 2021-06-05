@@ -439,7 +439,42 @@ func compile_tree(tree_statement):
 	return tree_node_stack[0].node
 
 func gen_bt_node(tree_node):
-	return gen_bt_node_from_task(tree_node.task)
+	var created_node_list = []
+	
+	var task = gen_bt_node_from_task(tree_node.task)
+	created_node_list.append(task)
+	
+	# gen guards
+	var guard_node_list = []
+	for guard in tree_node.guard_list:
+		var g = gen_bt_node_from_task(guard)
+		created_node_list.append(g)
+		
+		if has_error:
+			break
+		
+		guard_node_list.append(g)
+	
+	# add guards
+	if not has_error:
+		if not guard_node_list.empty():
+			var n = task.get_node_or_null('Guards')
+			if n == null:
+				n = Node.new()
+				n.name = 'Guards'
+				task.add_child(n)
+			
+			for g in guard_node_list:
+				n.add_child(g)
+				task.guard_path = task.get_path_to(g)
+	
+	if has_error:
+		for n in created_node_list:
+			if is_instance_valid(n):
+				n.queue_free()
+		return null
+	
+	return task
 
 func gen_tree_node_stack_element(i, n):
 	return {
