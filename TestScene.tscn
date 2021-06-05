@@ -1,6 +1,81 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://TestScene.gd" type="Script" id=1]
+[ext_resource path="res://font/NotoSansSC-Regular.otf" type="DynamicFontData" id=2]
 
-[node name="TestScene" type="Node2D"]
+[sub_resource type="DynamicFont" id=1]
+font_data = ExtResource( 2 )
+
+[node name="TestScene" type="Node"]
 script = ExtResource( 1 )
+
+[node name="Control" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSplitContainer" type="HSplitContainer" parent="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 3.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Input" type="TextEdit" parent="Control/HSplitContainer"]
+margin_right = 506.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = SubResource( 1 )
+text = "#
+# 小狗的行为树
+#
+
+import 叫:\"res://dog/bt/BarkTask.gd\"
+import 摇摆:\"res://dog/bt/CareTask.gd\"
+import 标记:\"res://dog/bt/MarkTask.gd\"
+import 走:\"res://dog/bt/WalkTask.gd\"
+
+subtree name: 摇摆树
+	 parallel 										# 并行
+		  摇摆 次数:  3 							# 摇摆3次
+		   alwaysFail 								# 总是失败
+			    'res://dog/bt/RestTask' # 休息
+
+tree
+	selector											 # 选择
+		$摇摆树 										# 引用子树
+		sequence 									# 顺序
+			叫 次数: rand_rangei(1, 1)
+			走
+			\"res://dog/bt/BarkTask\"	 # 直接使用字符串也行
+			标记
+	
+
+"
+show_line_numbers = true
+draw_tabs = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Output" type="TextEdit" parent="Control/HSplitContainer"]
+margin_left = 518.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = SubResource( 1 )
+text = "asdasd"
+readonly = true
+show_line_numbers = true
+draw_tabs = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="text_changed" from="Control/HSplitContainer/Input" to="." method="_on_Input_text_changed"]

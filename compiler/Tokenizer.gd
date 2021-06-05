@@ -93,7 +93,7 @@ class Token:
 				value = raw == 'true'
 			INDENT:
 				value = raw.length() - (1 if raw[0] == '\n' else 0)
-			ID, LEFT_CLOSURE, RIGHT_CLOSURE, COLON, OPERATOR:
+			ID, LEFT_CLOSURE, RIGHT_CLOSURE, COLON, COMMAS, OPERATOR:
 				value = raw
 	
 	func _to_string() -> String:
@@ -261,10 +261,10 @@ func _get_next_token():
 
 func _get_next():
 	var res:StateMachineResult
-	var token = gen_token(Token.UNDEFINED, '', next, next, line_cnt, last_line_break)
+	var token = gen_token(Token.UNDEFINED, '', next, 1, line_cnt, last_line_break)
 	
 	if next >= source.length():
-		return gen_token(Token.EOF, '', next, next, line_cnt, last_line_break)
+		return gen_token(Token.EOF, '', next, 1, line_cnt, last_line_break)
 	
 	if source[next] == 't' or source[next] == 'f': # Bool
 		var start = next
@@ -445,7 +445,9 @@ func calc_error(error_list):
 	return error
 
 func is_valid_char(i:int):
-	return not source[i] in preserved_char_list
+	if source[i] in preserved_char_list:
+		return false
+	return true
 
 func is_valid_char_without_digit(i:int):
 	if source[i] in digit_char_list:

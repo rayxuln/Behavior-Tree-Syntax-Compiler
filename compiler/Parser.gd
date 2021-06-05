@@ -11,6 +11,11 @@ var preserved_id = ['import', 'name', 'subtree', 'tree']
 
 var has_tree
 
+var has_error
+var is_print_error = true
+var fist_error:String = ''
+var last_error:String = ''
+
 #----- Gramar -----
 # bt_file = import_part tree_part
 #
@@ -86,17 +91,13 @@ func init(t):
 func parse():
 	tokenizer.init(tokenizer.source)
 	has_tree = false
+	has_error = false
 	
 	var ast = AST.new()
 	
 	_bt_file(ast)
 	
-	match_blank_or_null()
-	match_comment_or_null()
-	match_line_break_or_comment_or_indent_with_comment_or_null()
-	
 	var token = tokenizer.get_next()
-	print('End token: ' + str(token))
 	
 	if token.type != Tokenizer.Token.EOF:
 		error(token, 'EOF')
@@ -202,6 +203,12 @@ func match_line_break_or_comment_or_indent_with_comment_or_null():
 			elif tokenizer.preview_next(2).type == Tokenizer.Token.INDENT:
 				tokenizer.get_next()
 				token = tokenizer.preview_next()
+			elif tokenizer.preview_next(2).type == Tokenizer.Token.LINE_BREAK:
+				tokenizer.get_next()
+				token = tokenizer.preview_next()
+			elif tokenizer.preview_next(2).type == Tokenizer.Token.EOF:
+				tokenizer.get_next()
+				token = tokenizer.preview_next()
 			else:
 				break
 		else:
@@ -250,25 +257,44 @@ func get_indent_token_with_ID_followed(): # or with a left braket
 	return -1
 
 func error(token, expect = ''):
-	var next_line_break =  tokenizer.calc_next_line_break(token.last_line_break+1)
+	if token == null:
+		last_error = expect
+		if not has_error:
+			fist_error = last_error
+		has_error = true
+		return
+		
+	var last_line_break = 0 if token.last_line_break == -1 else token.last_line_break
+	
+	var next_line_break =  tokenizer.calc_next_line_break(last_line_break+1)
 	var e = 'Expect %s ' % expect if expect != '' else 'Error '
-	e += 'at line: %d, column: %d.' % [token.line, token.start - token.last_line_break]
+	e += 'at line: %d, column: %d.' % [token.line+1, token.start - last_line_break + 1]
 	e += 'Got %s' % str(token)
 	
-	var e_line = tokenizer.source.substr(token.last_line_break, next_line_break-token.last_line_break)
+	var e_line = tokenizer.source.substr(last_line_break, next_line_break-last_line_break)
 	
 	var e_locate = ''
-	for i in range(token.start - token.last_line_break):
-		e_locate += ' ' if tokenizer.source.ord_at(token.start+i) < 128 else '  '
+	for i in range(token.start - last_line_break):
+		e_locate += ' ' if tokenizer.source.ord_at(last_line_break+(1 if token.type != Tokenizer.Token.EOF else 0)+i) < 128 else '  '
 	for _i in range(token.length-1):
 		e_locate += '~'
 	e_locate += '^'
 	
-	printerr('%s\n%s\n%s' % [e, e_line, e_locate])
+	last_error = '%s\n%s\n%s' % [e, e_line, e_locate]
+	if is_print_error:
+		printerr(last_error)
+	if not has_error:
+		fist_error = last_error
+	has_error = true
 #----- Top Down Parsers -----
 func _bt_file(ast):
+	match_comment_or_null()
+	match_line_break_or_comment_or_indent_with_comment_or_null()
 	_import_part(ast)
 	_tree_part(ast)
+	match_blank_or_null()
+	match_comment_or_null()
+	match_line_break_or_comment_or_indent_with_comment_or_null()
 
 func _import_part(ast):
 	ast.import_part = AST.ImportPart.new()
@@ -279,6 +305,9 @@ func _import_part(ast):
 		match_line_break_or_comment_or_indent_with_comment_or_null()
 		_import_statement(ast.import_part)
 		token = tokenizer.preview_next_without(exclude)
+		
+		if has_error:
+			break
 	
 
 func _import_statement(import_part):
@@ -295,7 +324,6 @@ func _import_statement(import_part):
 	var import_statement = AST.ImportStatement.new(id_token, string_token)
 	import_part.import_statement_list.append(import_statement)
 	
-	print('Found import: [%s -> %s]' % [id_token.value, string_token.value])
 
 func _tree_part(ast):
 	ast.tree_part = AST.TreePart.new()
@@ -306,15 +334,12 @@ func _tree_part(ast):
 		if token.value == 'tree':
 			if not has_tree:
 				has_tree = true
-				print('Found tree')
 				match_line_break_or_comment_or_indent_with_comment_or_null()
 				_tree_statement(ast.tree_part)
 			else:
-				printerr('You can only have one tree in a file.')
 				error(token, 'no more than one tree')
 				tokenizer.get_next()
 		elif token.value == 'subtree':
-			print('Found subtree')
 			match_line_break_or_comment_or_indent_with_comment_or_null()
 			_subtree_statement(ast.tree_part)
 		else:
@@ -343,7 +368,6 @@ func _subtree_statement(tree_part):
 	match_blank_or_null()
 	var id_token = match_id()
 	subtree.name = id_token
-	print('name: %s' % id_token.value)
 	match_blank_or_null()
 	match_comment_or_null()
 	match_line_break_or_comment_or_indent_with_comment_or_null()
@@ -358,13 +382,15 @@ func _tree_node_part(tree):
 		tree.tree_node_list.append(tree_node)
 		tree_node_cnt += 1
 		preview_pos = get_indent_token_with_ID_followed()
+		
+		if has_error:
+			break
 	if tree_node_cnt == 0:
-		printerr('Empty tree.')
+		error(null, 'Empty tree.')
 
 func _tree_node_statement():
 	var tree_node = AST.TreeNode.new()
 	
-	print('{')
 	var indent_token = match_indent()
 	tree_node.indent = indent_token
 	var token = tokenizer.preview_next()
@@ -374,7 +400,6 @@ func _tree_node_statement():
 	tree_node.task = _task()
 	match_blank_or_null()
 	match_comment_or_null()
-	print('}')
 	
 	return tree_node
 
@@ -383,17 +408,22 @@ func _guard_part(tree_node):
 	var token = tokenizer.preview_next_without(exclude)
 	while token.type == Tokenizer.Token.LEFT_CLOSURE and token.value == '(':
 		match_blank_or_null()
-		var task = _guard()
-		tree_node.guard_list.append(task)
+		var task = _guard() # could be null task for no guard
+		if task:
+			tree_node.guard_list.append(task)
 		token = tokenizer.preview_next_without(exclude)
+		
+		if has_error:
+			break
 
 func _guard():
 	match_value('(')
-	print('(')
 	match_blank_or_null()
-	var task = _task()
+	var token = tokenizer.preview_next()
+	var task = null
+	if not (token.type == Tokenizer.Token.RIGHT_CLOSURE and token.value == ')'):
+		task = _task()
 	match_blank_or_null()
-	print(')')
 	match_value(')')
 	
 	return task
@@ -407,9 +437,7 @@ func _task():
 	var exclude = [Tokenizer.Token.BLANK]
 	var token = tokenizer.preview_next_without(exclude)
 	if token.type == Tokenizer.Token.ID:
-		print('-[')
 		_parameter_part(task)
-		print(']-')
 	
 	return task
 
@@ -423,11 +451,9 @@ func _name():
 	elif token.type == Tokenizer.Token.ID:
 		var id_token = match_id()
 		name.name = id_token
-		print('buit-in name: %s' % id_token.value)
 	else:
 		var string_token = match_string()
 		name.name = string_token
-		print('string name: \'%s\'' % string_token.value)
 	
 	return name
 
@@ -436,7 +462,6 @@ func _subtree_ref(name):
 	name.is_subtree_ref = true
 	var id_token = match_id()
 	name.name = id_token
-	print('ref name: ' + id_token.value)
 
 func _parameter_part(task):
 	var exclude = [Tokenizer.Token.BLANK]
@@ -446,19 +471,19 @@ func _parameter_part(task):
 		var parameter = _parameter()
 		task.parameter_list.append(parameter)
 		token = tokenizer.preview_next_without(exclude)
+		
+		if has_error:
+			break
 
 func _parameter():
 	var parameter = AST.Parameter.new()
 	
 	var id_token = match_id()
 	parameter.id = id_token
-	print('param: ' + id_token.value)
 	match_blank_or_null()
 	match_value(':')
 	match_blank_or_null()
-	print('exp: [')
 	parameter.exp_node = _exp()
-	print(']')
 	
 	return parameter
 
@@ -471,7 +496,6 @@ func _exp():
 		match_blank_or_null()
 		var op_token = match_operator()
 		op_node.op = op_token
-		print(op_token.value)
 		
 		match_blank_or_null()
 		var right_exp_node = _e1()
@@ -480,6 +504,9 @@ func _exp():
 		left_exp_node = op_node
 		
 		token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
+		
+		if has_error:
+			break
 	return left_exp_node
 
 func _e1():
@@ -491,7 +518,6 @@ func _e1():
 		match_blank_or_null()
 		var op_token = match_operator()
 		op_node.op = op_token
-		print(op_token.value)
 		
 		
 		match_blank_or_null()
@@ -501,6 +527,9 @@ func _e1():
 		left_exp_node = op_node
 		
 		token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
+		
+		if has_error:
+			break
 	return left_exp_node
 
 
@@ -513,7 +542,6 @@ func _e2():
 		
 		var op_token = match_operator()
 		exp_node.op = op_token
-		print(op_token.value)
 	
 	var e3 = _e3()
 	if exp_node:
@@ -533,34 +561,27 @@ func _e3():
 			exp_node = _func()
 		else:
 			var id_token = match_id()
-			print(id_token)
 			exp_node = EXPAST.LeafNode.new()
 			exp_node.token = id_token
 	elif token.type == Tokenizer.Token.STRING:
 		var string_token = match_string()
-		print(string_token)
 		exp_node = EXPAST.LeafNode.new()
 		exp_node.token = string_token
 	elif token.type == Tokenizer.Token.NUMBER:
 		var number_token = match_number()
-		print(number_token)
 		exp_node = EXPAST.LeafNode.new()
 		exp_node.token = number_token
 	elif token.type == Tokenizer.Token.BOOL:
 		var bool_token = match_bool()
-		print(bool_token)
 		exp_node = EXPAST.LeafNode.new()
 		exp_node.token = bool_token
 	elif token.type == Tokenizer.Token.LEFT_CLOSURE and token.value == '(':
-		print('(')
 		match_value('(')
 		match_blank_or_null()
 		exp_node = _exp()
 		match_blank_or_null()
 		match_value(')')
-		print(')')
 	elif token.type == Tokenizer.Token.OPERATOR and token.value == '$':
-		print('$')
 		exp_node = _name()
 	
 	return exp_node
@@ -569,7 +590,6 @@ func _func():
 	var func_node = EXPAST.FuncNode.new()
 	
 	var id_token = match_id()
-	print('%s|(' % id_token.value)
 	func_node.id = id_token
 	
 	match_value('(')
@@ -579,7 +599,6 @@ func _func():
 		_arg_part(func_node)
 	match_blank_or_null()
 	match_value(')')
-	print(')|')
 	
 	return func_node
 
@@ -591,10 +610,14 @@ func _arg_part(func_node):
 	while token.type == Tokenizer.Token.COMMAS:
 		match_blank_or_null()
 		match_value(',')
-		print(',')
 		match_blank_or_null()
 		exp_node = _exp()
 		func_node.children.append(exp_node)
 		token = tokenizer.preview_next_without([Tokenizer.Token.BLANK])
+		if exp_node == null:
+			error(token, 'expression')
+		
+		if has_error:
+			break
 	
 	
