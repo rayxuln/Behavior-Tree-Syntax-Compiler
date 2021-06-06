@@ -1,6 +1,7 @@
+tool
 extends RaiixTester
 
-var Tokenizer = preload('res://compiler/Tokenizer.gd')
+var Tokenizer = preload('res://addons/naive_behavior_tree/compiler/Tokenizer.gd')
 
 func get_name():
 	return 'Tokenizer Tests'

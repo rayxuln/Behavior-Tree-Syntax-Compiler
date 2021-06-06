@@ -1,7 +1,8 @@
+tool
 extends RaiixTester
 
-var Parser = preload('res://compiler/Parser.gd')
-var EXPAST = preload('res://compiler/AST/EXPAST.gd')
+var Parser = preload('res://addons/naive_behavior_tree/compiler/Parser.gd')
+var EXPAST = preload('res://addons/naive_behavior_tree/compiler/AST/EXPAST.gd')
 
 var source:String = """
 import bark: "res://dog/bt/bark.gd" # 狗叫

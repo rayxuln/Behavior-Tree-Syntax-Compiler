@@ -3,7 +3,7 @@ extends Node
 
 var tokenizer_test = preload('res://test/tokenizer_test.gd').new()
 var parser_test = preload('res://test/parser_test.gd').new()
-var Compiler = preload('res://compiler/Compiler.gd')
+var Compiler = preload('res://addons/naive_behavior_tree/compiler/Compiler.gd')
 
 func _ready() -> void:
 #	tokenizer_test.run_tests()

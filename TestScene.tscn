@@ -42,7 +42,7 @@ text = "#
 # 测试输出
 #
 
-import print:\"res://behavior_tree/lib/test/Print.gd\"
+import print:\"res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd\"
 
 subtree name: print_123
 	parallel orchestrator: JOIN
