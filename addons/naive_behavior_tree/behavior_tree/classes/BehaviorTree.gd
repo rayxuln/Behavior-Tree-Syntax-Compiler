@@ -2,6 +2,8 @@ tool
 extends BTNode
 class_name BehaviorTree
 
+export(NodePath) var agent_path
+var agent
 
 export(NodePath) var root_path
 var root:BTNode = null
@@ -36,6 +38,8 @@ func _ready() -> void:
 		return
 	root = get_node(root_path)
 	tree = self
+	
+	agent = get_node_or_null(agent_path)
 	
 func _process(delta: float) -> void:
 	if Engine.editor_hint:

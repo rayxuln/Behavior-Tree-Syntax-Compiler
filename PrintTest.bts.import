@@ -1,0 +1,13 @@
+[remap]
+
+importer="raiix.bts.importer"
+type="Resource"
+path="res://.import/PrintTest.bts-e1257fb9cd36ec84518c21fc16341958.res"
+
+[deps]
+
+source_file="res://PrintTest.bts"
+dest_files=[ "res://.import/PrintTest.bts-e1257fb9cd36ec84518c21fc16341958.res" ]
+
+[params]
+
