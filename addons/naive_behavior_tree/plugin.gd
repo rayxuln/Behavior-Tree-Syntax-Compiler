@@ -1,6 +1,8 @@
 tool
 extends EditorPlugin
 
+var use_bts_editor = true
+
 var BTSImportPlugin = preload('./import_plugin/bts_import_plugin.gd')
 var bts_import_plugin
 
@@ -50,7 +52,7 @@ func _exit_tree() -> void:
 
 #----- Overrides -----
 func has_main_screen() -> bool:
-	return true
+	return use_bts_editor
 
 func make_visible(visible: bool) -> void:
 	if bts_editor:
@@ -87,6 +89,7 @@ func set_children_owner(p:Node, o:Node):
 
 func compile(path:String):
 	var basename = path.get_basename()
+	var fileNmae = path.get_file().replace('.' + path.get_extension(), '')
 	var ext = 'tscn'
 	var output = '%s.%s' % [basename, ext]
 	
@@ -115,6 +118,7 @@ func compile(path:String):
 	if bt == null:
 		printerr('Can\'t compile bts: "%s"' % path)
 		return false
+	bt.name = fileNmae
 	set_children_owner(bt, bt)
 	
 	var ps = PackedScene.new()
@@ -123,6 +127,7 @@ func compile(path:String):
 	err = ResourceSaver.save(output, ps)
 	if err != OK:
 		printerr('Can\'t save the output: "%s", code: %d' % [output, err])
+		bt.queue_free()
 		return false
 	return true
 	

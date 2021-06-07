@@ -177,6 +177,10 @@ gdscript/warnings/return_value_discarded=false
 
 window/dpi/allow_hidpi=true
 
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/naive_behavior_tree/plugin.cfg" )
+
 [physics]
 
 common/enable_pause_aware_picking=true

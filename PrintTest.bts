@@ -18,6 +18,6 @@ tree
 		timer wait: 1
 		random_selector
 			print msg: 'b'
-			print msg: 'c'4
+			print msg: 'c'
 		timer wait: 1 #
 	
