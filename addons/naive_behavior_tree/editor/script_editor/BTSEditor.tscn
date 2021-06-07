@@ -1,0 +1,81 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/naive_behavior_tree/editor/script_editor/BTSEdit.gd" type="Script" id=1]
+[ext_resource path="res://addons/naive_behavior_tree/editor/script_editor/BTSEditor.gd" type="Script" id=2]
+
+[node name="BTSEditor" type="VBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_right = 1024.0
+margin_bottom = 20.0
+
+[node name="FileMenu" type="MenuButton" parent="HBoxContainer"]
+margin_right = 35.0
+margin_bottom = 20.0
+text = "File"
+items = [ "Save", null, 0, false, false, 0, 0, null, "", false ]
+
+[node name="EditMenu" type="MenuButton" parent="HBoxContainer"]
+margin_left = 39.0
+margin_right = 75.0
+margin_bottom = 20.0
+focus_mode = 2
+text = "Edit"
+items = [ "Undo", null, 0, false, false, 0, 0, null, "", false, "Redo", null, 0, false, false, 1, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Copy", null, 0, false, false, 3, 0, null, "", false, "Cut", null, 0, false, false, 4, 0, null, "", false, "Paste", null, 0, false, false, 5, 0, null, "", false, "", null, 0, false, false, 6, 0, null, "", true, "Select All", null, 0, false, false, 7, 0, null, "", false, "Clear", null, 0, false, false, 8, 0, null, "", false ]
+
+[node name="TitleLabel" type="Label" parent="HBoxContainer"]
+margin_left = 79.0
+margin_top = 3.0
+margin_right = 335.0
+margin_bottom = 17.0
+text = "Behavior Tree Script Editor - res://re.gd*"
+
+[node name="BTSEdit" type="TextEdit" parent="."]
+margin_top = 24.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "#
+# 测试输出
+#
+
+import print:\"res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd\"
+
+subtree name: print_123
+	parallel orchestrator: JOIN
+		print msg: '1'
+		print msg: '2'
+		print msg: '3'
+
+tree
+	sequence
+		$print_123
+		timer wait: 1
+		print msg:'a'
+		timer wait: 1
+		random_selector
+			print msg: 'b'
+			print msg: 'c'
+		timer wait: 1
+	
+
+"
+highlight_current_line = true
+syntax_highlighting = true
+show_line_numbers = true
+draw_tabs = true
+highlight_all_occurrences = true
+minimap_draw = true
+caret_blink = true
+script = ExtResource( 1 )
+
+[connection signal="text_changed" from="BTSEdit" to="." method="_on_BTSEdit_text_changed"]

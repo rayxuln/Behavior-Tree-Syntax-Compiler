@@ -10,6 +10,9 @@ var inspector_plugin
 
 var BTSCompiler = preload('./compiler/Compiler.gd')
 
+var BTSEditor = preload('res://addons/naive_behavior_tree/editor/script_editor/BTSEditor.tscn')
+var bts_editor
+
 var clean_confirm_dialog:ConfirmationDialog
 
 func _enter_tree() -> void:
@@ -25,8 +28,17 @@ func _enter_tree() -> void:
 	clean_confirm_dialog = ConfirmationDialog.new()
 	get_editor_interface().get_base_control().add_child(clean_confirm_dialog)
 	clean_confirm_dialog.connect('confirmed', self, '_confirm_clean_file')
+	
+	bts_editor = BTSEditor.instance()
+	get_editor_interface().get_editor_viewport().add_child(bts_editor)
+	make_visible(false)
+
+func _ready() -> void:
+	bts_editor.init(self)
 
 func _exit_tree() -> void:
+	bts_editor.queue_free()
+	
 	remove_import_plugin(bts_import_plugin)
 	bts_import_plugin = null
 	
@@ -34,7 +46,31 @@ func _exit_tree() -> void:
 	inspector_plugin = null
 	
 	clean_confirm_dialog.queue_free()
+	
 
+#----- Overrides -----
+func has_main_screen() -> bool:
+	return true
+
+func make_visible(visible: bool) -> void:
+	if bts_editor:
+		bts_editor.visible = visible
+
+func handles(object: Object) -> bool:
+	if object is BehaviorTreeScriptResource:
+		return true
+	return false
+
+func edit(object: Object) -> void:
+	if object is BehaviorTreeScriptResource:
+		bts_editor.edit(object.source_path)
+	
+
+func save_external_data() -> void:
+	bts_editor.save()
+
+func get_plugin_name() -> String:
+	return 'Naive Behavior Tree Plugin'
 #----- Methods -----
 func compile_task_function(path):
 	print('Begin to compile bts: "%s"...' % path)
