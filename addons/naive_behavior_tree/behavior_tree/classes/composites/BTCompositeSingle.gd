@@ -47,11 +47,20 @@ func run():
 				running_child.run()
 
 func start():
-	current_child_index = 0
 	running_child = null
+	current_child_index = 0
+	if get_children().size() <= 0:
+		printerr('The composite single node has no child!')
+		return
+	if not get_child(current_child_index) is BTNode:
+		var c = get_next_child()
+		if c:
+			current_child_index = c.get_index()
+		else:
+			printerr('The composite single node has no BTNode child!')
 
 func cancel_running_children(start_index):
-	.cancel_running_children(start())
+	.cancel_running_children(start_index)
 	running_child = null
 
 func reset():

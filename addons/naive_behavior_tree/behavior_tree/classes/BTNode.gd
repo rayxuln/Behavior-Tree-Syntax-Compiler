@@ -62,8 +62,8 @@ func check_guard(_parent):
 	if not guard.check_guard(_parent):
 		return false
 	
-	guard.parent = tree.guard_evaluator
-	guard.tree = tree
+	guard.parent = _parent.tree.guard_evaluator
+	guard.tree = _parent.tree
 	guard.start()
 	guard.run()
 	
