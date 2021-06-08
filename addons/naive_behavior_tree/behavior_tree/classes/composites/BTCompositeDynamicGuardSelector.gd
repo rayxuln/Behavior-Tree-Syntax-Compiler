@@ -42,9 +42,12 @@ func run():
 			running_child.parent = self
 			running_child.tree = tree
 			running_child.start()
-		else:
-			running_child.run()
+		running_child.run()
 
 func reset():
 	.reset()
+	running_child = null
+
+func cancel():
+	.cancel()
 	running_child = null
