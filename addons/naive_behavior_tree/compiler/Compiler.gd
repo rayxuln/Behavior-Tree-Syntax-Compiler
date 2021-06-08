@@ -35,9 +35,6 @@ func lib_mult(a, b):
 
 func lib_divide(a, b):
 	return a / b
-
-func lib_sin(x):
-	return sin(x)
 #----- Classes -----
 const Parser = preload('./Parser.gd')
 const Tokenizer = preload('./Tokenizer.gd')
@@ -326,6 +323,8 @@ var symbol_table
 
 var importer_table
 
+var lib_list
+
 var parser
 var tokenizer
 
@@ -334,6 +333,7 @@ var has_error:bool
 func init():
 	symbol_table = {} # {ID: Symbol}
 	importer_table = {} # {sufiix: Importer}
+	lib_list = [] # [LibBase]
 	
 	has_error = false
 	
@@ -367,7 +367,8 @@ func init():
 	add_const_symbol('-', FuncSymbol.new(funcref(self, 'lib_sub'), 2))
 	add_const_symbol('*', FuncSymbol.new(funcref(self, 'lib_mult'), 2))
 	add_const_symbol('/', FuncSymbol.new(funcref(self, 'lib_divide'), 2))
-	add_const_symbol('sin', FuncSymbol.new(funcref(self, 'lib_sin'), 1))
+	
+	add_lib(preload('./lib/BasicLib.gd'))
 
 func add_importer(suffix:String, importer:Importer):
 	importer_table[suffix] = importer
@@ -377,6 +378,24 @@ func add_const_symbol(id, s):
 		printerr('%s already exist.' % id)
 		return
 	symbol_table[id] = s
+
+func add_lib(s:Script):
+	var lib = s.new()
+	lib_list.append(lib)
+	if not lib.has_method('_Class_Type_LibBase_'):
+		printerr('"%s" is not a libary.' % s.path)
+		return
+	var prefix = lib.get_func_prefix()
+	
+	for m in lib.get_method_list():
+		if m.name.find(prefix) == 0:
+			var id = m.name.substr(prefix.length(), m.name.length() - prefix.length())
+			var arg = m.args.size()
+			add_func_symbol(id, lib, m.name, arg)
+	
+
+func add_func_symbol(id:String, obj:Object, func_name:String, expect_arg_num:int):
+	add_const_symbol(id, FuncSymbol.new(funcref(obj, func_name), expect_arg_num))
 
 func compile(source:String):
 	parser = Parser.new()
