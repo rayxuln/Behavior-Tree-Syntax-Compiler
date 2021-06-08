@@ -1,0 +1,10 @@
+import print:"res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd"
+
+
+
+tree
+	parallel
+		print msg: '1'
+	
+	
+	

@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd" type="Script" id=1]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeParallel.gd" type="Script" id=2]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/BehaviorTree.gd" type="Script" id=3]
+
+[node name="PrintTest2" type="Node"]
+script = ExtResource( 3 )
+root_path = NodePath("parallel")
+
+[node name="parallel" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="print" type="Node" parent="parallel"]
+script = ExtResource( 1 )
+msg = "1"
