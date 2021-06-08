@@ -92,10 +92,10 @@ func child_running(running_task, reporter):
 	pass
 #----- Methods -----
 func start():
-	pass
+	tree.emit_signal('task_started', self)
 
 func end():
-	pass
+	tree.emit_signal('task_ended', self)
 
 func reset():
 	if status == RUNNING:

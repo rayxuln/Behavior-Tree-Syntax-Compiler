@@ -8,6 +8,7 @@ export(float) var wait:float = 1 #sec
 #----- Methods -----
 func start():
 	start_time = OS.get_ticks_msec()
+	.start()
 	
 
 func execute():

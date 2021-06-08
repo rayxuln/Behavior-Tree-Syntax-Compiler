@@ -58,6 +58,7 @@ func start():
 			current_child_index = c.get_index()
 		else:
 			printerr('The composite single node has no BTNode child!')
+	.start()
 
 func cancel_running_children(start_index):
 	.cancel_running_children(start_index)

@@ -9,6 +9,7 @@ var count:int
 #----- Methods -----
 func start():
 	count = times
+	.start()
 
 func condition():
 	return loop and count != 0

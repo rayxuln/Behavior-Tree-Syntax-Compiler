@@ -2,6 +2,9 @@ tool
 extends BTNode
 class_name BehaviorTree
 
+signal task_started(task)
+signal task_ended(task)
+
 export(NodePath) var agent_path
 var agent
 
@@ -40,6 +43,7 @@ func _ready() -> void:
 	tree = self
 	
 	agent = get_node_or_null(agent_path)
+
 	
 func _process(delta: float) -> void:
 	if Engine.editor_hint:
@@ -74,3 +78,10 @@ func reset():
 	.reset()
 	tree = self
 #----- Signals -----
+
+	
+	
+	
+	
+	
+	
