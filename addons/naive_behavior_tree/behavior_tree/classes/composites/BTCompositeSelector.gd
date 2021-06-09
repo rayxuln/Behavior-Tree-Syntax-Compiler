@@ -7,6 +7,11 @@ class_name BTCompositeSelector
 # 若该节点运行成功，则成功
 # 若失败，则选取下一个节点来运行
 
+# selector
+# Choose one child to run in order
+# If the child success, it success
+# Otherwise, it chooses next child to run.
+
 #----- Methods -----
 func child_success(task):
 	.child_success(task)

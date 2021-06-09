@@ -1,6 +1,6 @@
 tool
 extends BTNode
-class_name BehaviorTree
+class_name BehaviorTree, '../../icon.svg'
 
 signal task_started(task)
 signal task_ended(task)

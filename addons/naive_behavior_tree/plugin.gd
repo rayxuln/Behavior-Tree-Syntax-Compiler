@@ -73,6 +73,9 @@ func save_external_data() -> void:
 
 func get_plugin_name() -> String:
 	return 'Naive Behavior Tree Plugin'
+
+func get_plugin_icon() -> Texture:
+	return preload("res://addons/naive_behavior_tree/icon.svg")
 #----- Methods -----
 func compile_task_function(path):
 	print('Begin to compile bts: "%s"...' % path)

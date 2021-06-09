@@ -7,6 +7,11 @@ class_name BTCompositeSequence
 # 当一个子节点运行成功后，才运行下一个节点
 # 当所有子节点都运行成功后，才视为运行成功
 
+# sequence
+# Run children in order
+# Only when a child success, it runs the next child.
+# When all child success, it success.
+
 #----- Methods -----
 func child_success(task):
 	.child_success(task)

@@ -157,8 +157,8 @@ _global_script_class_icons={
 "BTDecoratorUntilSuccess": "",
 "BTLoopDecorator": "",
 "BTNode": "",
-"BehaviorTree": "",
-"BehaviorTreeScriptResource": "",
+"BehaviorTree": "res://addons/naive_behavior_tree/icon.svg",
+"BehaviorTreeScriptResource": "res://addons/naive_behavior_tree/icon.svg",
 "RaiixTester": ""
 }
 

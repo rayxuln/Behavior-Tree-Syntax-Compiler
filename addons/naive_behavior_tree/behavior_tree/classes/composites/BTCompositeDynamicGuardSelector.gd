@@ -7,6 +7,11 @@ class_name BTCompositeDynamicGuardSelector
 # 只运行成立的某一个子节点
 # 若所有节点的条件都不成立，则失败
 
+# Dynamic Guard Selector
+# Choose a child that pass guard check to run in order.
+# Only run one child at a time.
+# If all child guard check fail, it fail.
+
 var running_child:BTNode
 
 #----- Methods -----

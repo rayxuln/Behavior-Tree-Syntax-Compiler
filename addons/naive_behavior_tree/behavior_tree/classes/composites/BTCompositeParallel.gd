@@ -4,14 +4,20 @@ class_name BTCompositeParallel
 
 enum Policy {
 	SEQUENCE, # 只要有一个子节点失败，则并行节点失败；当所有子节点成功时，并行节点成功
+	# As long as one child fail, it fail.
+	# When all child success, it success.
 	SELECTOR # 只要有一个子节点成功，则并行节点成功；只有所有节点失败，并行节点才失败
+	# As long as one child success, it success.
+	# Only all child fail, it fail.
 }
 
 enum Orchestrator {
 	Resume, # 子节点会每帧都开始或者继续运行
 					# 当一个子节点成功后完全不会等待其他子节点
+	# Resume children every frame.
 	Join # 子节点会执行到成功或者失败，子节点会在并行节点成功或者失败后才会重新执行
 			 # 例如：假设有一个子节点为定时器节点，等待1秒钟，若其他子节点在1秒内都执行成功了，则需要等待该定时器，直到1秒结束
+	# Wait for all child fail/success to fail/success.
 }
 
 export(Policy) var policy

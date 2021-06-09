@@ -6,7 +6,9 @@ var last_func_state:GDScriptFunctionState
 var is_finally_done:bool
 
 #----- Abstract Methods -----
+# In order to implement the function you want, you need to override this function.
 # must return status
+# support yiled statement
 func execute():
 	print('This is a empty action.')
 	return SUCCEEDED

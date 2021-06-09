@@ -1,6 +1,6 @@
 tool
 extends Resource
-class_name BehaviorTreeScriptResource
+class_name BehaviorTreeScriptResource, '../icon.svg'
 
 #
 # load .bts file
