@@ -1,16 +1,24 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd" type="Script" id=1]
-[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeParallel.gd" type="Script" id=2]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/lib/test/SignalTimer.gd" type="Script" id=2]
 [ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/BehaviorTree.gd" type="Script" id=3]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeSequence.gd" type="Script" id=4]
 
 [node name="PrintTest2" type="Node"]
 script = ExtResource( 3 )
-root_path = NodePath("parallel")
+root_path = NodePath("sequence")
 
-[node name="parallel" type="Node" parent="."]
+[node name="sequence" type="Node" parent="."]
+script = ExtResource( 4 )
+
+[node name="print" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+msg = "=====| Start |====="
+
+[node name="stimer" type="Node" parent="sequence"]
 script = ExtResource( 2 )
 
-[node name="print" type="Node" parent="parallel"]
+[node name="print2" type="Node" parent="sequence"]
 script = ExtResource( 1 )
-msg = "1"
+msg = "=====| End |====="

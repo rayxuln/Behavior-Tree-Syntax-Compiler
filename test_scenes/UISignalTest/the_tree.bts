@@ -1,0 +1,17 @@
+
+import show: 'res://test_scenes/UISignalTest/bt/set_text.gd'
+import yield: 'res://test_scenes/UISignalTest/bt/wait_signal.gd'
+
+
+
+tree
+	sequence
+		show msg: 'click the button!' n: 'Label'
+		yield obj: 'Button' sig: 'pressed'
+		show msg: 'click again!' n: 'Label'
+		yield obj: 'Button' sig: 'pressed'
+		show msg: 'Thanks!' n: 'Label'
+		yield obj: 'Button' sig: 'pressed'
+
+
+

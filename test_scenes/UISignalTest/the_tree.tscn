@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://test_scenes/UISignalTest/bt/set_text.gd" type="Script" id=1]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/BehaviorTree.gd" type="Script" id=2]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeSequence.gd" type="Script" id=3]
+[ext_resource path="res://test_scenes/UISignalTest/bt/wait_signal.gd" type="Script" id=4]
+
+[node name="the_tree" type="Node"]
+script = ExtResource( 2 )
+root_path = NodePath("sequence")
+
+[node name="sequence" type="Node" parent="."]
+script = ExtResource( 3 )
+
+[node name="show" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+msg = "click the button!"
+n = "Label"
+
+[node name="yield" type="Node" parent="sequence"]
+script = ExtResource( 4 )
+obj = "Button"
+sig = "pressed"
+
+[node name="show2" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+msg = "click again!"
+n = "Label"
+
+[node name="yield2" type="Node" parent="sequence"]
+script = ExtResource( 4 )
+obj = "Button"
+sig = "pressed"
+
+[node name="show3" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+msg = "Thanks!"
+n = "Label"
+
+[node name="yield3" type="Node" parent="sequence"]
+script = ExtResource( 4 )
+obj = "Button"
+sig = "pressed"

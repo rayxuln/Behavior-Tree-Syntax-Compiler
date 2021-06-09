@@ -1,10 +1,13 @@
 import print:"res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd"
-
+import stimer:"res://addons/naive_behavior_tree/behavior_tree/lib/test/SignalTimer.gd"
 
 
 tree
-	parallel
-		print msg: '1'
+	sequence
+		print msg: '=====| Start |====='
+		stimer
+		print msg: '=====| End |====='
+		
 	
 	
 	

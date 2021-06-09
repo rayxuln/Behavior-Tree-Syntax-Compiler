@@ -1,0 +1,13 @@
+[remap]
+
+importer="raiix.bts.importer"
+type="Resource"
+path="res://.import/the_tree.bts-08069db595361e2867554abe9adfd834.res"
+
+[deps]
+
+source_file="res://test_scenes/UISignalTest/the_tree.bts"
+dest_files=[ "res://.import/the_tree.bts-08069db595361e2867554abe9adfd834.res" ]
+
+[params]
+
