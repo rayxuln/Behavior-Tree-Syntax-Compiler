@@ -45,7 +45,7 @@ func _ready() -> void:
 	agent = get_node_or_null(agent_path)
 
 	
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if Engine.editor_hint:
 		return
 	step()

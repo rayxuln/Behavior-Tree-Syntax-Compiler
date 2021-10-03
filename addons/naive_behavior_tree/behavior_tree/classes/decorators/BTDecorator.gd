@@ -7,7 +7,7 @@ var child = null
 #----- Methods -----
 func run():
 	if get_bt_child().status == RUNNING:
-		child.running()
+		child.run()
 	else:
 		child.parent = self
 		child.tree = tree

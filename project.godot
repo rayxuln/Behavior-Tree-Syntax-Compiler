@@ -179,7 +179,7 @@ window/dpi/allow_hidpi=true
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/naive_behavior_tree/plugin.cfg" )
+enabled=PoolStringArray(  )
 
 [physics]
 
