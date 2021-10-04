@@ -3,7 +3,6 @@ extends Node
 
 var tokenizer_test = preload('res://test/tokenizer_test.gd').new()
 var parser_test = preload('res://test/parser_test.gd').new()
-var Compiler = preload('res://addons/naive_behavior_tree/compiler/Compiler.gd')
 
 func _ready() -> void:
 #	tokenizer_test.run_tests()
@@ -22,6 +21,7 @@ func _on_Input_text_changed() -> void:
 
 
 func _on_CompileButton_pressed() -> void:
+	var Compiler = load('res://addons/naive_behavior_tree/compiler/Compiler.gd')
 	var c = Compiler.new()
 	c.init()
 	var bt = c.compile($Control/VSplitContainer/HSplitContainer/Input.text)

@@ -7,11 +7,13 @@ func get_name():
 	return 'Tokenizer Tests'
 
 #----- Methods -----
-func print_next(t):
+func print_next(t, blank=false, eof=false):
 	var token = t.get_next()
 	while token.type == Tokenizer.Token.BLANK:
+		if blank:
+			print(token)
 		token = t.get_next()
-	if token.type != Tokenizer.Token.ERROR:
+	if token.type != Tokenizer.Token.ERROR or eof:
 		print(token)
 #----- Tests -----
 func test_should_be_right():
@@ -22,7 +24,7 @@ func test_should_be_right():
 		print_next(t)
 	
 
-func _test_should_be_right2():
+func test_should_be_right2():
 	var t = Tokenizer.new()
 	var source = 'true)'
 	t.init(source)
@@ -64,3 +66,19 @@ func test_wrong_String4():
 	print_next(t)
 	print_next(t)
 
+func _test_header_comment1():
+	var t = Tokenizer.new()
+	var source = '#\n# 666\n#\ntree	timer wait: 0.3'
+	t.init(source)
+	while not t.preview_next().type in [Tokenizer.Token.EOF, Tokenizer.Token.ERROR]:
+		print_next(t, true, true)
+	
+func _test_header_comment2():
+	var t = Tokenizer.new()
+	var source = '# sadsds\n# 666\n#\ntree	timer wait: 0.3'
+	t.init(source)
+	while not t.preview_next().type in [Tokenizer.Token.EOF, Tokenizer.Token.ERROR]:
+		print_next(t, true, true)
+	
+	
+	

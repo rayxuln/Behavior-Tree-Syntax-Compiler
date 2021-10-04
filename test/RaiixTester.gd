@@ -19,3 +19,6 @@ func run_tests():
 		call(m)
 		cnt += 1
 	print("Done!")
+
+func _run() -> void:
+	run_tests()

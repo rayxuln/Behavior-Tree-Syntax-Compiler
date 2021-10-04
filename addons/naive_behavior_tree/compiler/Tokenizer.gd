@@ -466,7 +466,7 @@ func is_indent_start(i:int):
 	if i+1 >= source.length():
 		return false
 	if (source[i] == '\n' or i == 0):
-		if source[i+1] in indent_char_list:
+		if source[i if i == 0 else i+1] in indent_char_list:
 			return true
 	return false
 
