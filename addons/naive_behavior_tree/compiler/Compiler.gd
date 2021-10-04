@@ -342,6 +342,7 @@ func init():
 	add_const_symbol('fail', BuiltInBTNodeSymbol.new(BTActionFail))
 	add_const_symbol('success', BuiltInBTNodeSymbol.new(BTActionSuccess))
 	add_const_symbol('timer', BuiltInBTNodeSymbol.new(BTActionTimer))
+	add_const_symbol('random_timer', BuiltInBTNodeSymbol.new(BTActionRandomTimer))
 	
 	add_const_symbol('dynamic_guard_selector', BuiltInBTNodeSymbol.new(BTCompositeDynamicGuardSelector))
 	add_const_symbol('parallel', BuiltInBTNodeSymbol.new(BTCompositeParallel))
@@ -603,6 +604,7 @@ func gen_bt_node_from_task(task):
 			var symbol = symbol_table[task.name.name.value]
 			if symbol.get_class() == 'SubtreeSymbol':
 				var bt = compile_tree(symbol.subtree)
+				bt.name = '%s [%s]' % [task.name.name.value, bt.name]
 				if has_error:
 					if is_instance_valid(bt):
 						bt.queue_free()

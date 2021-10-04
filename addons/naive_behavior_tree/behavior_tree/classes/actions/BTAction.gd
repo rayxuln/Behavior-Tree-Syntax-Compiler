@@ -5,6 +5,8 @@ class_name BTAction
 var last_func_state:GDScriptFunctionState
 var is_finally_done:bool
 
+func _Class_Type_BTAction_():
+	pass
 #----- Abstract Methods -----
 # In order to implement the function you want, you need to override this function.
 # must return status
