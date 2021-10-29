@@ -32,7 +32,7 @@ var Indent_fstate_list
 var next_token_queue:Array
 
 var has_error:bool
-var is_print_error:bool = false
+var is_print_error:bool = true
 var first_error:String
 var last_error:String
 
@@ -235,7 +235,8 @@ func init(_s:String):
 	
 	Indent_trans_table = {
 		0: [
-			gen_transition(1, 'is_indent_start', '<indent>'),
+			gen_transition(1, 'is_indent_start_0', '^<indent>'),
+			gen_transition(2, 'is_indent_start_1', '<indent>'),
 		],
 		1: gen_transitions_char_list(2, indent_char_list),
 		2: gen_transitions_char_list(2, indent_char_list),
@@ -426,8 +427,8 @@ func run_state_machine(state, current_next, state_transition_table, final_state_
 	if not state in final_state_list:
 		assert(error_list.size() > 0)
 		var error = calc_error(error_list)
-		if next < source.length():
-			res.error = ('Illegal char \'%s\', expect %s at line: %d, column: %d:\n%s' % [source[next], error, error_list[0].line+1, error_list[0].column+1, calc_locate_error(error_list)])
+		if current_next < source.length():
+			res.error = ('Illegal char \'%s\', expect %s at line: %d, column: %d:\n%s' % [source[current_next].c_escape(), error, error_list[0].line+1, error_list[0].column+1, calc_locate_error(error_list)])
 			res.status = StateMachineResult.FAIL
 		else:
 #			res.error = ('Expect %s.' % error)
@@ -457,7 +458,7 @@ func calc_error(error_list):
 	var error = ''
 	var cnt = 0
 	for e in error_list:
-		error += '\'%s\'' % e.msg
+		error += '%s' % e.msg
 		if cnt < error_list.size() - 1:
 			error += ' or '
 		cnt += 1
@@ -481,6 +482,22 @@ func is_indent_start(i:int):
 			return true
 	return false
 
+func is_indent_start_0(i:int):
+	if i+1 >= source.length():
+		return false
+	if (source[i] == '\n'):
+		if source[i+1] in indent_char_list:
+			return true
+	return false
+
+func is_indent_start_1(i:int):
+	if i >= source.length():
+		return false
+	if (i == 0):
+		if source[i] in indent_char_list:
+			return true
+	return false
+
 func is_digit_char(i:int):
 	return source[i] in digit_char_list
 
@@ -498,7 +515,7 @@ func gen_transition_char(to:int , c):
 		'to': to,
 		'type': TransitionConditionType.CHAR,
 		'char': c,
-		'error': '\'%s\'' % c
+		'error': '\'%s\'' % c.c_escape()
 	}
 	
 func gen_transition_not_char(to:int , c):
@@ -506,7 +523,7 @@ func gen_transition_not_char(to:int , c):
 		'to': to,
 		'type': TransitionConditionType.NOT_CHAR,
 		'char': c,
-		'error': 'no \'%s\'' % c
+		'error': 'no \'%s\'' % c.c_escape()
 	}
 
 func gen_token(type, raw, start, l, line, last_l_break):

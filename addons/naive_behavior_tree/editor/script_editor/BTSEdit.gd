@@ -24,7 +24,7 @@ var builtin_node_name_list := [
 	'until_success',
 ]
 
-var no_compeletion := false
+var indent_size := 4
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventKey:
@@ -48,6 +48,8 @@ func set_syntax_highlight_color(editor:EditorInterface):
 	
 	for s in builtin_node_name_list:
 		add_keyword_color(s, editor.get_editor_settings().get('text_editor/highlighting/function_color'))
+	
+	indent_size = editor.get_editor_settings().get('text_editor/indent/size')
 
 func get_current_word():
 	if text.empty():
@@ -80,6 +82,12 @@ func get_current_pos(prefix:String):
 	var line_text := get_line(line)
 	var font:Font = get_font('font')
 	var res = font.get_string_size(line_text.substr(0, column))
+	var tab_size = indent_size
+	var tab_count = 0
+	for s in line_text:
+		if s == '\t':
+			tab_count += 1
+	var tab_x = tab_size * tab_count * font.get_char_size(' '.ord_at(0)).x
 	
 	var line_number_w = 0
 	var line_number = get_line_count()-1
@@ -88,8 +96,8 @@ func get_current_pos(prefix:String):
 		line_number /= 10
 	line_number_w = (line_number_w+1) * font.get_char_size('0'.ord_at(0)).x
 	
-	res.x += line_number_w - font.get_string_size(prefix).x - 3 # margin
-	res.y = (line+1) * get_row_height()
+	res.x += tab_x + line_number_w - font.get_string_size(prefix).x - 3 - scroll_horizontal # margin
+	res.y = (line+1-scroll_vertical) * get_row_height()
 	return res
 	
 func get_row_height():
