@@ -3,3 +3,4 @@ build
 *.translation
 export_presets.cfg
 .mono
+.tmp

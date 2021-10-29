@@ -29,6 +29,9 @@ var keyword_list := [
 	'tree',
 	'subtree',
 	'import',
+	
+	'true',
+	'false',
 ]
 
 onready var container:VBoxContainer = $VBoxContainer

@@ -63,9 +63,8 @@ func get_current_word():
 	while not t.preview_next().type in [Tokenizer.Token.EOF, Tokenizer.Token.ERROR]:
 		var token = t.get_next()
 		if token.type == Tokenizer.Token.ID:
-			res = token.value
-			if token.start <= column and token.start + token.length > column:
-				res = res.substr(0, column - token.start)
+			if token.start < column and token.start + token.length >= column:
+				res = token.value.substr(0, column - token.start)
 				break
 	
 	if res.length() < 2:
@@ -73,7 +72,7 @@ func get_current_word():
 	return res
 	
 
-func get_current_pos():
+func get_current_pos(prefix:String):
 	if text.empty():
 		return Vector2.ZERO
 	var line := cursor_get_line()
@@ -89,7 +88,7 @@ func get_current_pos():
 		line_number /= 10
 	line_number_w = (line_number_w+1) * font.get_char_size('0'.ord_at(0)).x
 	
-	res.x += line_number_w
+	res.x += line_number_w - font.get_string_size(prefix).x - 3 # margin
 	res.y = (line+1) * get_row_height()
 	return res
 	
@@ -104,5 +103,6 @@ func _on_CompletionPopup_completion_selected(prefix:String, word:String) -> void
 
 
 func _on_AutoCompletionTimer_timeout() -> void:
-	$CompletionPopup.rect_position = get_current_pos()
-	$CompletionPopup.build_completion_word_list(get_current_word(), text)
+	var prefix = get_current_word()
+	$CompletionPopup.rect_position = get_current_pos(prefix)
+	$CompletionPopup.build_completion_word_list(prefix, text)
