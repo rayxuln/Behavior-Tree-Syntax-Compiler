@@ -117,7 +117,7 @@ func compile(path:String):
 	var compiler = BTSCompiler.new()
 	compiler.init()
 	
-	var bt = compiler.compile(source)
+	var bt = compiler.compile(source, path)
 	if bt == null:
 		printerr('Can\'t compile bts: "%s"' % path)
 		return false

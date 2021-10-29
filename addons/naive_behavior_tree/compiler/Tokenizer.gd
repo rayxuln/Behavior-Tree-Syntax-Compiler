@@ -136,6 +136,17 @@ class Token:
 				return '[Line Break]'
 		return '[Unknown Token]'
 	
+	func to_string_token():
+		var res = Token.new()
+		res.type = STRING
+		res.raw = raw
+		res.value = str(value)
+		res.start = start
+		res.length = length
+		res.line = line
+		res.last_line_break = last_line_break
+		return res
+		
 #----- Methods -----
 func init(_s:String):
 	source = _s

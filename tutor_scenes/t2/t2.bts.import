@@ -1,0 +1,13 @@
+[remap]
+
+importer="raiix.bts.importer"
+type="Resource"
+path="res://.import/t2.bts-d4713eed55e51f16aa95bbc8b5d1644b.res"
+
+[deps]
+
+source_file="res://tutor_scenes/t2/t2.bts"
+dest_files=[ "res://.import/t2.bts-d4713eed55e51f16aa95bbc8b5d1644b.res" ]
+
+[params]
+

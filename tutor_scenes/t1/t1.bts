@@ -1,0 +1,14 @@
+# t1
+
+import print: "res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd"
+
+tree
+	sequence
+		print msg: "1"
+		timer wait: 1
+		print msg: "2"
+		timer wait: 1
+		print msg: "3"
+		timer wait: 1
+
+

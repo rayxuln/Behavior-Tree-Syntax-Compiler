@@ -138,10 +138,15 @@ class BTNodeSymbol:
 class CustomBTNodeSymbol:
 	extends BTNodeSymbol
 	
-	var script_path
+	var script_path:String
 	
 	func _init(compiler, path_token) -> void:
+		var source_path:String = compiler.source_path
 		script_path = path_token.value
+		
+		if script_path.is_rel_path():
+			script_path = '%s/%s' % [source_path.get_base_dir(), script_path]
+		
 		the_script = load(script_path)
 		if not the_script:
 			compiler.error(ScriptNotFoundError.new(path_token))
@@ -329,6 +334,8 @@ var parser
 var tokenizer
 
 var has_error:bool
+
+var source_path:String
 #----- Methods -----
 func init():
 	symbol_table = {} # {ID: Symbol}
@@ -398,7 +405,9 @@ func add_lib(s:Script):
 func add_func_symbol(id:String, obj:Object, func_name:String, expect_arg_num:int):
 	add_const_symbol(id, FuncSymbol.new(funcref(obj, func_name), expect_arg_num))
 
-func compile(source:String):
+func compile(source:String, _source_path:String = ''):
+	source_path = _source_path
+	
 	parser = Parser.new()
 	tokenizer = Tokenizer.new()
 	tokenizer.init(source)

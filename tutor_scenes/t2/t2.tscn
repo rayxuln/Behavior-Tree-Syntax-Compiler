@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/actions/BTActionTimer.gd" type="Script" id=1]
+[ext_resource path="res://tutor_scenes/t2/show.gd" type="Script" id=2]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/BehaviorTree.gd" type="Script" id=3]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeSequence.gd" type="Script" id=4]
+
+[node name="t2" type="Node"]
+script = ExtResource( 3 )
+root_path = NodePath("sequence")
+
+[node name="sequence" type="Node" parent="."]
+script = ExtResource( 4 )
+
+[node name="show" type="Node" parent="sequence"]
+script = ExtResource( 2 )
+s = "3"
+
+[node name="timer" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+
+[node name="show2" type="Node" parent="sequence"]
+script = ExtResource( 2 )
+s = "2"
+
+[node name="timer2" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+
+[node name="show3" type="Node" parent="sequence"]
+script = ExtResource( 2 )
+s = "1"
+
+[node name="timer3" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+
+[node name="show4" type="Node" parent="sequence"]
+script = ExtResource( 2 )
+s = "Hello world!"
+
+[node name="timer4" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+wait = 3.0

@@ -316,15 +316,20 @@ func _import_statement(import_part):
 	match_blank()
 	var id_token = match_id()
 	match_blank_or_null()
-	match_value(':')
-	match_blank_or_null()
-	var string_token = match_string()
-	match_blank_or_null()
+	var string_token = id_token.to_string_token()
+	string_token.value = '%s.gd' % string_token.value
+	
+	var token = tokenizer.preview_next()
+	if token.value == ':':
+		match_value(':')
+		match_blank_or_null()
+		string_token = match_string()
+		match_blank_or_null()
+	
 	match_comment_or_null()
 	
 	var import_statement = AST.ImportStatement.new(id_token, string_token)
 	import_part.import_statement_list.append(import_statement)
-	
 
 func _tree_part(ast):
 	ast.tree_part = AST.TreePart.new()

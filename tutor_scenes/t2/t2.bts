@@ -1,0 +1,21 @@
+
+import show: "res://tutor_scenes/t2/show.gd"
+
+tree
+	sequence
+		show s: "3"
+		timer wait: 1
+		show s: "2"
+		timer wait: 1
+		show s: "1"
+		timer wait: 1
+		show s: "Hello world!"
+		timer wait: 3
+
+
+
+
+
+
+
+

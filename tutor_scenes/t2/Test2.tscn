@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://tutor_scenes/t2/t2.tscn" type="PackedScene" id=1]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+margin_left = 118.433
+margin_top = 196.548
+margin_right = 835.432
+margin_bottom = 241.548
+text = "eee"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="t2" parent="." instance=ExtResource( 1 )]
+agent_path = NodePath("..")

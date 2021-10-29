@@ -5,11 +5,35 @@ class_name BehaviorTree, '../../icon.svg'
 signal task_started(task)
 signal task_ended(task)
 
+export var enable := true setget _on_set_enable
+func _on_set_enable(v):
+	if enable != v:
+		if v:
+			if resume_mode == ResumeMode.Reset:
+				reset()
+	enable = v
+var ready := false
+enum ResumeMode {
+	Resume,
+	Reset,
+}
+export(ResumeMode) var resume_mode = ResumeMode.Resume
+
 export(NodePath) var agent_path
 var agent
 
 export(NodePath) var root_path
 var root:BTNode = null
+
+enum ProcessMode {
+	Process,
+	Physics,
+}
+export(ProcessMode) var process_mode = ProcessMode.Physics setget _on_set_process_mode
+func _on_set_process_mode(v):
+	process_mode = v
+	set_process(process_mode == ProcessMode.Process)
+	set_physics_process(process_mode == ProcessMode.Physics)
 
 class GuardEvaluator:
 	extends BTNode
@@ -43,12 +67,24 @@ func _ready() -> void:
 	tree = self
 	
 	agent = get_node_or_null(agent_path)
-
 	
-func _physics_process(delta: float) -> void:
+	ready = true
+	
+	_on_set_process_mode(process_mode)
+	
+
+func _notification(what: int) -> void:
 	if Engine.editor_hint:
 		return
-	step()
+	if not enable:
+		return
+	match what:
+		NOTIFICATION_PHYSICS_PROCESS:
+			if process_mode == ProcessMode.Physics:
+				step()
+		NOTIFICATION_PROCESS:
+			if process_mode == ProcessMode.Process:
+				step()
 #----- Methods -----
 func child_running(running_task, reporter):
 	running()
