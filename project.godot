@@ -134,6 +134,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/naive_behavior_tree/import_plugin/BehaviorTreeScriptResource.gd"
 }, {
+"base": "ResourceFormatLoader",
+"class": "BehaviorTreeScriptResourceLoader",
+"language": "GDScript",
+"path": "res://addons/naive_behavior_tree/import_plugin/BehaviorTreeScriptResourceLoader.gd"
+}, {
+"base": "ResourceFormatSaver",
+"class": "BehaviorTreeScriptResourceSaver",
+"language": "GDScript",
+"path": "res://addons/naive_behavior_tree/import_plugin/BehaviorTreeScriptResourceSaver.gd"
+}, {
 "base": "Reference",
 "class": "RaiixTester",
 "language": "GDScript",
@@ -165,6 +175,8 @@ _global_script_class_icons={
 "BTNode": "",
 "BehaviorTree": "res://addons/naive_behavior_tree/icon.svg",
 "BehaviorTreeScriptResource": "res://addons/naive_behavior_tree/icon.svg",
+"BehaviorTreeScriptResourceLoader": "",
+"BehaviorTreeScriptResourceSaver": "",
 "RaiixTester": ""
 }
 

@@ -7,7 +7,6 @@ class_name BehaviorTreeScriptResource, '../icon.svg'
 # which is a text file containing script that defines a behavior tree
 #
 
-export(String) var source_path:String
+export var __tools__ := 0
 
-
-
+var data:String

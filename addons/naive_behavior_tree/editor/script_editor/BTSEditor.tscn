@@ -49,7 +49,7 @@ margin_right = 75.0
 margin_bottom = 20.0
 focus_mode = 2
 text = "Edit"
-items = [ "Undo", null, 0, false, false, 0, 0, null, "", false, "Redo", null, 0, false, false, 1, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Copy", null, 0, false, false, 3, 0, null, "", false, "Cut", null, 0, false, false, 4, 0, null, "", false, "Paste", null, 0, false, false, 5, 0, null, "", false, "", null, 0, false, false, 6, 0, null, "", true, "Select All", null, 0, false, false, 7, 0, null, "", false, "Clear", null, 0, false, false, 8, 0, null, "", false ]
+items = [ "Undo", null, 0, false, false, 0, 0, null, "", false, "Redo", null, 0, false, false, 1, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Copy", null, 0, false, false, 3, 0, null, "", false, "Cut", null, 0, false, false, 4, 0, null, "", false, "Paste", null, 0, false, false, 5, 0, null, "", false, "", null, 0, false, false, 6, 0, null, "", true, "Select All", null, 0, false, false, 7, 0, null, "", false, "Clear", null, 0, false, false, 8, 0, null, "", false, "", null, 0, false, false, 9, 0, null, "", true, "Move Up", null, 0, false, false, 10, 0, null, "", false, "Move Down", null, 0, false, false, 11, 0, null, "", false, "Duplicate", null, 0, false, false, 12, 0, null, "", false ]
 
 [node name="TitleLabel" type="Label" parent="HBoxContainer"]
 margin_left = 79.0

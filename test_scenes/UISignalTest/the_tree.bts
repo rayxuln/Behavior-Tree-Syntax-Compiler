@@ -1,6 +1,6 @@
 
-import show: 'res://test_scenes/UISignalTest/bt/set_text.gd'
-import yield: 'res://test_scenes/UISignalTest/bt/wait_signal.gd'
+import show: 'bt/set_text.gd'
+import yield: 'bt/wait_signal.gd'
 
 
 

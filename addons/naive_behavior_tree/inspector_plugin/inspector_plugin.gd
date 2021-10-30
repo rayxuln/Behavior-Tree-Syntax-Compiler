@@ -17,7 +17,7 @@ func parse_category(object: Object, category: String) -> void:
 	pass
 
 func parse_property(object: Object, type: int, path: String, hint: int, hint_text: String, usage: int) -> bool:
-	if path == 'source_path':
+	if path == '__tools__':
 		var res = object as BehaviorTreeScriptResource
 		var b = Button.new()
 		b.text = tr('Compile')
@@ -30,7 +30,7 @@ func parse_property(object: Object, type: int, path: String, hint: int, hint_tex
 		clean_b.connect('pressed', self, '_on_clean_button_pressed', [res])
 		
 		var l = Label.new()
-		l.text = res.source_path
+		l.text = res.resource_path
 		l.size_flags_horizontal = Label.SIZE_EXPAND_FILL
 		l.size_flags_stretch_ratio = 2
 		
