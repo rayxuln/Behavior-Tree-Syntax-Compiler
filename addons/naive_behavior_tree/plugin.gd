@@ -6,6 +6,7 @@ var use_bts_editor = true
 var InspectorPlugin = preload('./inspector_plugin/inspector_plugin.gd')
 var inspector_plugin
 
+var remote_debug = preload('./remote_debug/RemoteDebug.gd').new()
 
 var BTSCompiler = preload('./compiler/Compiler.gd')
 
@@ -28,9 +29,12 @@ func _enter_tree() -> void:
 	bts_editor = BTSEditor.instance()
 	get_editor_interface().get_editor_viewport().add_child(bts_editor)
 	make_visible(false)
+	
 
 func _ready() -> void:
 	bts_editor.init(self)
+	add_child(remote_debug)
+	
 
 func _exit_tree() -> void:
 	bts_editor.queue_free()
@@ -39,7 +43,6 @@ func _exit_tree() -> void:
 	inspector_plugin = null
 	
 	clean_confirm_dialog.queue_free()
-	
 
 #----- Overrides -----
 func has_main_screen() -> bool:

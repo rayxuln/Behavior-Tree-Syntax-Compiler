@@ -148,6 +148,11 @@ _global_script_classes=[ {
 "class": "RaiixTester",
 "language": "GDScript",
 "path": "res://test/RaiixTester.gd"
+}, {
+"base": "Reference",
+"class": "RemoteDebugProtocol",
+"language": "GDScript",
+"path": "res://addons/naive_behavior_tree/remote_debug/RemoteDebugProtocol.gd"
 } ]
 _global_script_class_icons={
 "BTAction": "",
@@ -177,7 +182,8 @@ _global_script_class_icons={
 "BehaviorTreeScriptResource": "res://addons/naive_behavior_tree/icon.svg",
 "BehaviorTreeScriptResourceLoader": "",
 "BehaviorTreeScriptResourceSaver": "",
-"RaiixTester": ""
+"RaiixTester": "",
+"RemoteDebugProtocol": ""
 }
 
 [application]
