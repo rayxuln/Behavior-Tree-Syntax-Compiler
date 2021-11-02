@@ -4,6 +4,10 @@ class_name BehaviorTree, '../../icon.svg'
 
 signal task_started(task)
 signal task_ended(task)
+signal task_status_changed(task)
+
+signal tree_active
+signal tree_inactive
 
 export var enable := true setget _on_set_enable
 func _on_set_enable(v):
@@ -11,6 +15,9 @@ func _on_set_enable(v):
 		if v:
 			if resume_mode == ResumeMode.Reset:
 				reset()
+			emit_signal('tree_active')
+		else:
+			emit_signal('tree_inactive')
 	enable = v
 var ready := false
 enum ResumeMode {

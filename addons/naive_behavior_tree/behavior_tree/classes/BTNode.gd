@@ -14,7 +14,13 @@ var parent:Node = null
 var tree = null
 export(NodePath) var guard_path
 var guard:Node = null
-var status = FRESH
+var status = FRESH setget _on_set_status
+func _on_set_status(v):
+	var old = status
+	status = v
+	if status != old:
+		if tree:
+			tree.emit_signal('task_status_changed', self)
 
 func _ready() -> void:
 	if Engine.editor_hint:
@@ -24,25 +30,25 @@ func _ready() -> void:
 
 #----- Final Methods -----
 func running():
-	status = RUNNING
+	self.status = RUNNING
 	if parent:
 		parent.child_running(self, self)
 	
 func success():
-	status = SUCCEEDED
+	self.status = SUCCEEDED
 	end()
 	if parent:
 		parent.child_success(self)
 	
 func fail():
-	status = FAILED
+	self.status = FAILED
 	end()
 	if parent:
 		parent.child_fail(self)
 	
 func cancel():
 	cancel_running_children(0)
-	status = CANCELLED
+	self.status = CANCELLED
 	end()
 
 func cancel_running_children(start_index):
@@ -98,11 +104,11 @@ func end():
 	tree.emit_signal('task_ended', self)
 
 func reset():
-	if status == RUNNING:
+	if self.status == RUNNING:
 		cancel()
 	for child in get_children():
 		if child.has_method('_Class_Type_BTNode_'):
 			child.reset()
-	status = FRESH
+	self.status = FRESH
 	tree = null
 	parent = null

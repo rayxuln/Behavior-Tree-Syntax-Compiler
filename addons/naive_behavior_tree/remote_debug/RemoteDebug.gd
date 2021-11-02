@@ -3,6 +3,8 @@ extends Node
 
 signal remote_node_selected(id)
 
+const debug = true
+
 const CaptureFuncObject = preload('./CaptureFuncObject.gd')
 
 const TOOL_MENU_NAME := 'Behavior Tree Remote Debug'
@@ -18,10 +20,14 @@ var tool_menu:PopupMenu = null
 
 const RemoteDebugServer = preload('./RemoteDebugServer.gd')
 var remote_debug_server:RemoteDebugServer
+const REMOTE_DEBUG_VIEW_TITLE := 'NBT Remote Debug'
+
+const RemoteDebugView = preload('./remote_debug_view/RemoteDebugView.tscn')
+var remote_debug_view:Control
 
 var remote_tree_np := @'/root/EditorNode/@@580/@@581/@@589/@@591/@@595/@@596/@@597/Scene/@@6782'
 
-var enable := false
+var enable := true
 
 func _enter_tree() -> void:
 	get_plugin().add_tool_submenu_item(TOOL_MENU_NAME, create_tool_item())
@@ -72,6 +78,9 @@ func update_clients_submenu(removed_peer := null):
 		tool_menu.set_item_disabled(CLIENTS_MENU_ID, false)
 		return -1
 	
+	if not remote_debug_server:
+		return
+	
 	var current_client_index = -1
 	var clients_menu := tool_menu.get_node(CLIENTS_MENU_NAME) as PopupMenu
 	for i in clients_menu.get_item_count():
@@ -106,11 +115,21 @@ func on_enable():
 	add_child(remote_debug_server)
 	remote_debug_server.connect('client_connected', self, '_on_client_connected')
 	remote_debug_server.connect('client_disconnected', self, '_on_client_disconnected')
+	remote_debug_server.connect('current_peer_changed', self, '_on_current_peer_changed')
+	remote_debug_server.protocol.connect('tree_active', self, '_on_tree_active')
+	remote_debug_server.protocol.connect('tree_inactive', self, '_on_tree_inactive')
+	remote_debug_server.protocol.connect('tree_node_status_changed', self, '_on_tree_node_status_changed')
 	
 	update_clients_submenu()
 	
+	remote_debug_view = RemoteDebugView.instance()
+	get_plugin().add_control_to_bottom_panel(remote_debug_view, REMOTE_DEBUG_VIEW_TITLE)
+	remote_debug_view.connect('request_open_script', self, '_on_request_open_script')
+	remote_debug_view.connect('request_screenshot', self, '_on_take_screenshot')
+	
 	print('enable remote debug')
 	enable = true
+	
 
 
 func on_disable():
@@ -122,15 +141,30 @@ func on_disable():
 	remote_debug_server.queue_free()
 	remote_debug_server = null
 	
+	get_plugin().remove_control_from_bottom_panel(remote_debug_view)
+	remote_debug_view.queue_free()
+	remote_debug_view = null
+	
 	print('disable remote debug')
 	enable = false
 	
 	update_clients_submenu()
 
+func print_debug_msg(msg):
+	if debug:
+		print('[RemoteDebug]: %s' % msg)
 #----- Lambdas -----
 func __get_node_path_call_back(node_path):
-	print(node_path)
+	print_debug_msg(node_path)
 
+
+func __get_bt_data_call_back(bt_data):
+	remote_debug_view.on_recieve_all_data(bt_data)
+	if bt_data == null:
+		if remote_debug_view.is_visible_in_tree():
+			get_plugin().hide_bottom_panel()
+		return
+	get_plugin().make_bottom_panel_item_visible(remote_debug_view)
 #----- Signals -----
 func _on_tool_menu_clicked(id:int):
 	match id:
@@ -166,7 +200,84 @@ func _on_clients_menu_item_clicked(id:int):
 		remote_debug_server.set_current_peer_by_index(id)
 
 func _on_remote_node_selected(obj_id):
+	if not enable:
+		return
 	remote_debug_server.protocol.call_api('get_node_path', [obj_id], CaptureFuncObject.new({}, self, '__get_node_path_call_back'))
+	
+	remote_debug_server.protocol.call_api('get_bt_data', [obj_id], CaptureFuncObject.new({}, self, '__get_bt_data_call_back'))
+	
+	remote_debug_server.protocol.call_api('set_current_bt', [obj_id])
+
+
+func _on_tree_active(event):
+	remote_debug_view.on_update_data('enable', true)
+
+func _on_tree_inactive(event):
+	remote_debug_view.on_update_data('enable', false)
+
+func _on_current_peer_changed(peer):
+	if not remote_debug_view:
+		return
+	remote_debug_view.on_recieve_all_data(null)
+
+func _on_tree_node_status_changed(event):
+	remote_debug_view.on_update_tree_node_data(event.data.obj_id, event.data)
+
+func _on_request_open_script(path):
+	var script = load(path) as Script
+	if script == null:
+		printerr('%s is not a script!' % path)
+		return
+	get_plugin().get_editor_interface().edit_resource(script)
+
+
+func _on_take_screenshot():
+	if remote_debug_view == null:
+		return
+	if remote_debug_view.db.data.empty():
+		return
+	var vp = Viewport.new()
+	add_child(vp)
+	vp.render_target_clear_mode = Viewport.CLEAR_MODE_ONLY_NEXT_FRAME
+	vp.render_target_update_mode = Viewport.UPDATE_ALWAYS
+	vp.render_target_v_flip = true
+	
+	print('start taking screenshot (1)')
+	
+	yield(get_tree().create_timer(0.1), 'timeout')
+	print('setting up viewport (2)')
+	var temp_view = RemoteDebugView.instance()
+	vp.add_child(temp_view)
+	temp_view.theme = get_plugin().get_editor_interface().get_base_control().theme
+	temp_view.get_node('VBoxContainer/HBoxContainer').visible = false
+	
+	yield(get_tree().create_timer(0.1), 'timeout')
+	print('setting up graph node view (3)')
+	var data = remote_debug_view.db.data as Dictionary
+	temp_view.on_recieve_all_data(data)
+	var root = temp_view.obj_id_node_map[temp_view.db.get('root/obj_id')]
+	var ct_tree = temp_view.calc_tree_size(root)
+	vp.size = ct_tree.tree_size + Vector2(50, 50)
+	
+	temp_view.show()
+	
+	yield(get_tree().create_timer(0.1), 'timeout')
+	print('adjust graph node view (4)')
+	var graph_edit = temp_view.graph_edit as GraphEdit
+	graph_edit.scroll_offset = Vector2(-10, -50)
+	graph_edit.minimap_enabled = false
+	
+	yield(get_tree().create_timer(0.1), 'timeout')
+	print('taking image data (5)')
+	var img = vp.get_texture().get_data() as Image
+	img.save_png('res://nbt_screen_shot.png')
+	
+	yield(get_tree().create_timer(0.1), 'timeout')
+	print('done! (6)')
+	vp.queue_free()
+	
+	
+	
 
 
 

@@ -11,7 +11,10 @@ var peer:PacketPeerStream = null
 
 var connected := false
 
-var protocol := RemoteDebugProtocol.new()
+var Protocol := preload('./ClientProtocol.gd')
+var protocol := Protocol.new()
+
+var current_tree:BehaviorTree = null
 
 func _ready() -> void:
 	peer = PacketPeerStream.new()
@@ -28,6 +31,7 @@ func _ready() -> void:
 	
 	protocol.connect('request_put_var', self, 'put_var')
 	connect('server_message', protocol, 'on_recieve_data')
+	protocol.connect('set_current_behavior_tree', self, 'set_current_behavior_tree')
 
 func _process(delta: float) -> void:
 	if not peer:
@@ -71,6 +75,25 @@ func put_var(v):
 
 func on_connected():
 	print_debug_msg('Connected to the server.')
+
+func set_current_behavior_tree(bt):
+	if current_tree:
+		current_tree.disconnect('tree_active', self, '_on_tree_active')
+		current_tree.disconnect('tree_inactive', self, '_on_tree_inactive')
+		current_tree.disconnect('task_status_changed', self, '_on_tree_node_status_changed')
+	current_tree = bt
+	print_debug_msg('set current bt: %s' % bt)
+	if current_tree:
+		current_tree.connect('tree_active', self, '_on_tree_active')
+		current_tree.connect('tree_inactive', self, '_on_tree_inactive')
+		current_tree.connect('task_status_changed', self, '_on_tree_node_status_changed')
 #----- Signals -----
+func _on_tree_active():
+	protocol.boardcast_event('tree_active')
 
+func _on_tree_inactive():
+	protocol.boardcast_event('tree_inactive')
 
+func _on_tree_node_status_changed(task):
+	var data = protocol.gen_tree_node_data(task, true)
+	protocol.boardcast_event('tree_node_status_changed', data)

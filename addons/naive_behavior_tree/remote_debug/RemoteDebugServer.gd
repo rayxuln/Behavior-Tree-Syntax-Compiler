@@ -4,6 +4,7 @@ extends Node
 signal client_connected(peer)
 signal client_disconnected(peer)
 signal client_message(peer, data)
+signal current_peer_changed(peer)
 
 const port := 45537
 
@@ -15,7 +16,8 @@ var debug := true
 
 var current_peer:PacketPeerStream = null
 
-var protocol := RemoteDebugProtocol.new()
+var Protocol := preload('./ServerProtocol.gd')
+var protocol := Protocol.new()
 
 func _enter_tree() -> void:
 	server = TCP_Server.new()
@@ -99,10 +101,13 @@ func set_current_peer_by_index(id:int):
 
 func set_current_peer(peer_id):
 	if clients.has(peer_id):
+		if clients[peer_id] == current_peer:
+			return
 		current_peer = clients[peer_id]
 	else:
 		current_peer = null
 	print_debug_msg('set current peer to: %s' % (get_peer_id(current_peer) if current_peer else 'null'))
+	emit_signal('current_peer_changed', current_peer)
 
 func put_var(v):
 	if current_peer == null:
@@ -112,8 +117,5 @@ func put_var(v):
 	if err != OK:
 		print_debug_msg('can\'t put var. [Error:%s]' % err)
 		return
-
-func get_remote_node_path(node_id):
-	pass
 #----- Signals -----
 

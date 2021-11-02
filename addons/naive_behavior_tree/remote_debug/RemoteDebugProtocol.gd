@@ -1,5 +1,4 @@
 extends Reference
-class_name RemoteDebugProtocol
 
 signal request_put_var(data)
 
@@ -10,21 +9,34 @@ var pandding_request_map_list := {}
 enum {
 	REQ,
 	RES,
+	SUB, # for event
 }
 
 #----- APIs -----
-func api_get_node_path(obj_id):
-	var obj = instance_from_id(obj_id) as Node
-	if not obj:
-		printerr('obj id(%s) is invalid.' % obj_id)
-		return
-	return obj.get_path()
+
 #----- Methods -----
 func _init() -> void:
-	pass
+	var event_list = get_event_name_list()
+	for e in event_list:
+		add_user_signal(e, [TYPE_DICTIONARY])
 
 func get_api_name(name:String) -> String:
 	return 'api_%s' % name
+
+func get_event_name_list():
+	return [
+		'something_changed',
+	]
+
+func gen_event(name:String, data = null):
+	return {
+		'name': name,
+		'data': data,
+	}
+
+func boardcast_event(name:String, data = null):
+	var event = gen_event(name, data)
+	emit_signal('request_put_var', gen_sub(event))
 
 func call_api(name:String, args := [], callback = null):
 	var req:Dictionary = gen_req(name, callback, args)
@@ -56,6 +68,12 @@ func gen_res(req:Dictionary, data = null):
 		'data': data,
 	}
 
+func gen_sub(event):
+	return {
+		'type': SUB,
+		'event': event,
+	}
+
 func on_recieve_data(peer, data):
 	if not data is Dictionary:
 		return
@@ -78,4 +96,7 @@ func on_recieve_data(peer, data):
 						if req.callback:
 							req.callback.call_func([data.data])
 				pandding_request_map_list[name].clear()
+		SUB:
+			var event = data.event
+			emit_signal(event.name, event)
 
