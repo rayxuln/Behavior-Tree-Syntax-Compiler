@@ -9,7 +9,6 @@ var ParameterView := preload('./ParameterView.tscn')
 #----- Methods -----
 func set_data(_data):
 	data = _data
-	print(data)
 	update_content()
 
 func update_data(_data:Dictionary):

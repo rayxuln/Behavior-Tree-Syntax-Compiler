@@ -272,7 +272,7 @@ func _on_take_screenshot():
 	yield(get_tree().create_timer(0.1), 'timeout')
 #	print('setting up graph node view (3)')
 	var data = remote_debug_view.db.data as Dictionary
-	temp_view.on_recieve_all_data(data)
+	temp_view.on_recieve_all_data(data, false)
 	temp_view.show()
 	
 	yield(get_tree().create_timer(0.5), 'timeout')

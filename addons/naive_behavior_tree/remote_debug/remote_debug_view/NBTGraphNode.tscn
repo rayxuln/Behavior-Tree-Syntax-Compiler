@@ -30,7 +30,7 @@ border_width_bottom = 3
 border_color = Color( 0.886275, 0.615686, 0.0666667, 1 )
 border_blend = true
 
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=4]
 draw_center = false
 border_width_left = 3
 border_width_top = 3
@@ -39,7 +39,7 @@ border_width_bottom = 3
 border_color = Color( 1, 1, 1, 1 )
 border_blend = true
 
-[sub_resource type="StyleBoxFlat" id=4]
+[sub_resource type="StyleBoxFlat" id=5]
 draw_center = false
 border_width_left = 3
 border_width_top = 3
@@ -48,19 +48,19 @@ border_width_bottom = 3
 border_color = Color( 0.219608, 0.937255, 0.0431373, 1 )
 border_blend = true
 
-[sub_resource type="Theme" id=5]
+[sub_resource type="Theme" id=6]
 GraphNode/styles/cancelled = SubResource( 1 )
 GraphNode/styles/failed = SubResource( 2 )
 GraphNode/styles/running = SubResource( 3 )
-GraphNode/styles/status_changed = SubResource( 6 )
-GraphNode/styles/succeeded = SubResource( 4 )
+GraphNode/styles/status_changed = SubResource( 4 )
+GraphNode/styles/succeeded = SubResource( 5 )
 
 [node name="NBTGraphNode" type="GraphNode"]
 margin_right = 192.0
-margin_bottom = 88.0
+margin_bottom = 93.0
 size_flags_horizontal = 5
 size_flags_vertical = 5
-theme = SubResource( 5 )
+theme = SubResource( 6 )
 custom_constants/separation = 5
 title = "sdsd"
 slot/0/left_enabled = true
@@ -96,46 +96,61 @@ __meta__ = {
 margin_left = 16.0
 margin_top = 24.0
 margin_right = 176.0
-margin_bottom = 38.0
+margin_bottom = 44.0
 
 [node name="Label" type="Label" parent="HBoxContainer"]
+margin_top = 3.0
 margin_right = 78.0
-margin_bottom = 14.0
+margin_bottom = 17.0
 size_flags_horizontal = 3
 text = "Parent"
 valign = 1
 
-[node name="Label2" type="Label" parent="HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer"]
 margin_left = 82.0
 margin_right = 160.0
-margin_bottom = 14.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="HBoxContainer/HBoxContainer"]
+margin_top = 3.0
+margin_right = 57.0
+margin_bottom = 17.0
 size_flags_horizontal = 3
 text = "Children"
 align = 2
 valign = 1
 
+[node name="HideChildrenButton" type="Button" parent="HBoxContainer/HBoxContainer"]
+margin_left = 61.0
+margin_right = 78.0
+margin_bottom = 20.0
+text = "-"
+flat = true
+
 [node name="Label3" type="Label" parent="."]
 margin_left = 16.0
-margin_top = 43.0
+margin_top = 49.0
 margin_right = 176.0
-margin_bottom = 57.0
+margin_bottom = 63.0
 text = "Guard"
 align = 2
 valign = 1
 
 [node name="ScriptButton" type="Button" parent="."]
 margin_left = 16.0
-margin_top = 62.0
+margin_top = 68.0
 margin_right = 176.0
-margin_bottom = 82.0
+margin_bottom = 88.0
 text = "Click to open the Script"
 
 [node name="ParameterContainer" type="VBoxContainer" parent="."]
 margin_left = 16.0
-margin_top = 87.0
+margin_top = 93.0
 margin_right = 176.0
-margin_bottom = 87.0
+margin_bottom = 93.0
 custom_constants/separation = 0
 script = ExtResource( 2 )
 
+[connection signal="pressed" from="HBoxContainer/HBoxContainer/HideChildrenButton" to="." method="_on_HideChildrenButton_pressed"]
 [connection signal="pressed" from="ScriptButton" to="." method="_on_ScriptButton_pressed"]

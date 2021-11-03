@@ -2,6 +2,8 @@ tool
 extends GraphNode
 
 signal request_open_script(path)
+signal request_show_children
+signal request_hide_children
 
 enum {
 	PARENT_SLOT = 0,
@@ -35,8 +37,12 @@ func _on_set_status(v):
 
 onready var script_button = $ScriptButton
 onready var param_container = $ParameterContainer
+onready var hide_children_button = $HBoxContainer/HBoxContainer/HideChildrenButton
 
 var highlight_color := Color(1, 1, 1, 0)
+
+var hide_children := false
+var auto_hide_children := true
 
 var builtin_node_name_map := {
 	'BTActionFail': 'Fail',
@@ -83,9 +89,14 @@ func _process(delta: float) -> void:
 		highlight_color.a = lerp(highlight_color.a, 0, 0.03)
 		update()
 #----- Methods -----
-func set_data(node_data):
+func set_data(node_data, _auto_hide_children := true):
 	source_data = node_data
 	title = source_data.name
+	auto_hide_children = _auto_hide_children
+	if auto_hide_children:
+		if '[' in title and ']' in title:
+			hide_children = true
+			update_hide_children_button()
 	self.status = source_data.status
 	update_script_button()
 	if node_data.has('params'):
@@ -112,6 +123,20 @@ func update_script_button():
 		script_button.text = type
 	
 
+func update_hide_children_button():
+	if hide_children:
+		hide_children_button.text = '+'
+	else:
+		hide_children_button.text = '-'
 #----- Signals -----
 func _on_ScriptButton_pressed() -> void:
 	emit_signal('request_open_script', source_data.script)
+
+
+func _on_HideChildrenButton_pressed() -> void:
+	hide_children = not hide_children
+	update_hide_children_button()
+	if hide_children:
+		emit_signal('request_hide_children')
+	else:
+		emit_signal('request_show_children')

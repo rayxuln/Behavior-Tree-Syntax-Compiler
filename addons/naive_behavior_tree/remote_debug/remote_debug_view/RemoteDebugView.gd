@@ -31,7 +31,7 @@ func on_hide():
 #	db.data.clear()
 	pass
 
-func update_content():
+func update_content(_auto_hide_children := true):
 	if db.data.empty():
 		graph_edit.hide()
 		return
@@ -45,13 +45,14 @@ func update_content():
 	for c in children:
 		c.free()
 	obj_id_node_map.clear()
-
-	if db.data.root != null:
-		create_tree(db.data.root)
 	
-	update_connections()
+	if db.data.root != null:
+		create_tree(db.data.root, _auto_hide_children)
+	
 	
 	yield(get_tree(), 'idle_frame')
+	set_tree_node_visible(obj_id_node_map[db.get('root/obj_id')], true)
+	update_connections()
 	sort_nodes()
 
 func get_status_text(s):
@@ -68,21 +69,24 @@ func get_status_text(s):
 			return 'Fresh'
 	return 'Undefined'
 
-func create_tree(node_data):
+func create_tree(node_data, _auto_hide_children := true):
 	# add node
 	var node = NBTGraphNode.instance()
 	graph_edit.add_child(node)
-	node.set_data(node_data)
+	node.set_data(node_data, _auto_hide_children)
 	node.connect('request_open_script', self, '_on_request_open_script')
+	node.connect('request_hide_children', self, '_on_request_hide_children', [node])
+	node.connect('request_show_children', self, '_on_request_show_children', [node])
 	obj_id_node_map[node_data.obj_id] = node
 	
 	# add guard
 	if node_data.guard != null:
-		create_tree(node_data.guard)
+		create_tree(node_data.guard, _auto_hide_children)
 
 	# add children
 	for child_data in node_data.children:
-		create_tree(child_data)
+		create_tree(child_data, _auto_hide_children)
+	
 
 func update_title():
 	if db.data.empty():
@@ -90,13 +94,13 @@ func update_title():
 		return
 	title_label.text = '%s(%s) - %s' % [db.get('tree_name'), get_status_text(db.get('tree_status')), ('active' if db.get('enable') else 'inactive')]
 
-func on_recieve_all_data(data):
+func on_recieve_all_data(data, _auto_hide_children := true):
 	if data == null:
 		db.data.clear()
 	else:
 		db.data = data
 	update_title()
-	update_content()
+	update_content(_auto_hide_children)
 
 func on_update_data(path:String, data):
 	db.set(path, data)
@@ -129,14 +133,15 @@ func calc_tree_size(root:NBTGraphNodeType):
 	var root_size = root_data.node_size
 	
 	var child_size = Vector2.ZERO
-	for c in root.source_data.children:
-		var child = obj_id_node_map[c.obj_id]
-		var child_tree_data = calc_tree_size(child)
-		var child_tree_size = child_tree_data.tree_size
-		child_size.x = max(child_size.x, child_tree_size.x)
-		child_size.y += child_tree_size.y + vertical_margin
-		
-		root_data.children.append(child_tree_data)
+	if not root.hide_children:
+		for c in root.source_data.children:
+			var child = obj_id_node_map[c.obj_id]
+			var child_tree_data = calc_tree_size(child)
+			var child_tree_size = child_tree_data.tree_size
+			child_size.x = max(child_size.x, child_tree_size.x)
+			child_size.y += child_tree_size.y + vertical_margin
+			
+			root_data.children.append(child_tree_data)
 	
 	root_size.x += child_size.x + horizontal_margin
 	root_size.y = max(root_size.y, child_size.y)
@@ -184,10 +189,11 @@ func connect_tree_node(root:NBTGraphNodeType):
 		graph_edit.connect_node(root.name, NBTGraphNodeType.GUARD_SLOT, guard.name, NBTGraphNodeType.PARENT_SLOT)
 		connect_tree_node(guard)
 	
-	for c in root.source_data.children:
-		var child = obj_id_node_map[c.obj_id]
-		graph_edit.connect_node(root.name, NBTGraphNodeType.CHILDREN_SLOT, child.name, NBTGraphNodeType.PARENT_SLOT)
-		connect_tree_node(child)
+	if not root.hide_children:
+		for c in root.source_data.children:
+			var child = obj_id_node_map[c.obj_id]
+			graph_edit.connect_node(root.name, NBTGraphNodeType.CHILDREN_SLOT, child.name, NBTGraphNodeType.PARENT_SLOT)
+			connect_tree_node(child)
 
 func update_connections():
 	graph_edit.clear_connections()
@@ -197,6 +203,18 @@ func update_connections():
 		return
 	
 	connect_tree_node(root)
+
+func set_tree_node_visible(root:NBTGraphNodeType, v:bool):
+	if root == null:
+		return
+	root.visible = v
+	if root.source_data.guard != null:
+		var guard = obj_id_node_map[root.source_data.guard.obj_id]
+		set_tree_node_visible(guard, v)
+	
+	for c in root.source_data.children:
+		var child = obj_id_node_map[c.obj_id]
+		set_tree_node_visible(child, (not root.hide_children) && v)
 #----- Signals -----
 func _on_visibility_changed():
 	if Engine.editor_hint:
@@ -226,3 +244,24 @@ func _on_PopupMenu_id_pressed(id: int) -> void:
 func _on_GraphEdit_popup_request(position: Vector2) -> void:
 	popup_menu.rect_global_position = get_global_mouse_position()
 	popup_menu.popup()
+
+func _on_request_hide_children(node:NBTGraphNodeType):
+	var offset:Vector2 = graph_edit.scroll_offset - node.offset
+	for c in node.source_data.children:
+		var child = obj_id_node_map[c.obj_id]
+		set_tree_node_visible(child, false)
+	sort_nodes()
+	update_connections()
+	graph_edit.scroll_offset = offset + node.offset
+	
+func _on_request_show_children(node:NBTGraphNodeType):
+	var offset:Vector2 = graph_edit.scroll_offset - node.offset
+	for c in node.source_data.children:
+		var child = obj_id_node_map[c.obj_id]
+		set_tree_node_visible(child, true)
+	sort_nodes()
+	update_connections()
+	graph_edit.scroll_offset = offset + node.offset
+	
+	
+

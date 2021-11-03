@@ -42,6 +42,7 @@ margin_right = 1024.0
 margin_bottom = 600.0
 size_flags_vertical = 3
 scroll_offset = Vector2( 0, -24 )
+minimap_enabled = false
 
 [node name="PopupMenu" type="PopupMenu" parent="."]
 anchor_left = 0.5
