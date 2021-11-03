@@ -2,7 +2,9 @@ extends Node
 
 signal server_message(peer, data)
 
-var debug := false
+const SETTING_KEY_DEBUG := 'nbt_plugin/remote_debug/debug_mode'
+const SETTING_KEY_SEVER_ADDRESS := 'nbt_plugin/remote_debug/server_address'
+const SETTING_KEY_SEVER_PORT := 'nbt_plugin/remote_debug/server_port'
 
 var address := 'localhost'
 var port := 45537
@@ -25,6 +27,7 @@ func _ready() -> void:
 		print_debug_msg('Can\'t connect to the server: %s:%s' % [address, port])
 		print_debug_msg('Removing myself.')
 		queue_free()
+		queue_free()
 		return
 	print_debug_msg('connecting to server: %s:%s' % [address, port])
 	connected = false
@@ -32,6 +35,12 @@ func _ready() -> void:
 	protocol.connect('request_put_var', self, 'put_var')
 	connect('server_message', protocol, 'on_recieve_data')
 	protocol.connect('set_current_behavior_tree', self, 'set_current_behavior_tree')
+	
+	if ProjectSettings.has_setting(SETTING_KEY_SEVER_ADDRESS):
+		address = ProjectSettings.get_setting(SETTING_KEY_SEVER_ADDRESS)
+	if ProjectSettings.has_setting(SETTING_KEY_SEVER_PORT):
+		port = ProjectSettings.get_setting(SETTING_KEY_SEVER_PORT)
+
 
 func _process(delta: float) -> void:
 	if not peer:
@@ -49,7 +58,7 @@ func _process(delta: float) -> void:
 		queue_free()
 #----- Methods -----
 func print_debug_msg(msg:String):
-	if debug:
+	if ProjectSettings.get_setting(SETTING_KEY_DEBUG):
 		print('[RemoteDebugClient]: %s' % msg)
 
 func recieve_msg_from_peer():

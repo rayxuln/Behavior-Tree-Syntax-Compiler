@@ -100,7 +100,7 @@ func set_data(node_data, _auto_hide_children := true):
 	self.status = source_data.status
 	update_script_button()
 	if node_data.has('params'):
-		param_container.set_data(node_data.params)
+		param_container.set_data(node_data.params, source_data.script)
 	update()
 
 func update_data(node_data:Dictionary):

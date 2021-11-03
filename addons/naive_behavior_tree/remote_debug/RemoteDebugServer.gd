@@ -6,18 +6,18 @@ signal client_disconnected(peer)
 signal client_message(peer, data)
 signal current_peer_changed(peer)
 
-const port := 45537
+var port := 45537
 
 var server:TCP_Server
 
 var clients := {}
 
-var debug := false
-
 var current_peer:PacketPeerStream = null
 
 var Protocol := preload('./ServerProtocol.gd')
 var protocol := Protocol.new()
+
+const SETTING_KEY_DEBUG := 'nbt_plugin/remote_debug/debug_mode'
 
 func _enter_tree() -> void:
 	server = TCP_Server.new()
@@ -57,7 +57,7 @@ func _process(delta: float) -> void:
 	recieve_msg_from_current_peer()
 #----- Methods -----
 func print_debug_msg(msg:String):
-	if debug:
+	if ProjectSettings.get_setting(SETTING_KEY_DEBUG):
 		print('[RemoteDebugServer]: %s' % msg)
 
 func check_all_client_status():

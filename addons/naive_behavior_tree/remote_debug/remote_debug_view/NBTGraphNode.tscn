@@ -57,7 +57,7 @@ GraphNode/styles/succeeded = SubResource( 5 )
 
 [node name="NBTGraphNode" type="GraphNode"]
 margin_right = 192.0
-margin_bottom = 93.0
+margin_bottom = 99.0
 size_flags_horizontal = 5
 size_flags_vertical = 5
 theme = SubResource( 6 )

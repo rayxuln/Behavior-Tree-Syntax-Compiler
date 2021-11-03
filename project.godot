@@ -195,6 +195,13 @@ gdscript/warnings/return_value_discarded=false
 
 window/dpi/allow_hidpi=true
 
+[nbt_plugin]
+
+remote_debug/debug_mode=false
+remote_debug/server_address="localhost"
+remote_debug/server_port=45537
+remote_debug/auto_enable_when_plugin_enabled=true
+
 [physics]
 
 common/enable_pause_aware_picking=true

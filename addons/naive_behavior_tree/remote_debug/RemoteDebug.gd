@@ -3,8 +3,6 @@ extends Node
 
 signal remote_node_selected(id)
 
-var debug = false
-
 const CaptureFuncObject = preload('./CaptureFuncObject.gd')
 
 const TOOL_MENU_NAME := 'Behavior Tree Remote Debug'
@@ -15,6 +13,11 @@ const CLIENTS_MENU_ID := 1
 
 const REMOTE_DEBUG_CLIENT_AUTOLOAD_NAME := 'NBT_RemoteDebugClient'
 const REMOTE_DEBUG_CLIENT_PATH := 'RemoteDebugClient.gd'
+
+const SETTING_KEY_DEBUG := 'nbt_plugin/remote_debug/debug_mode'
+const SETTING_KEY_ENABLE := 'nbt_plugin/remote_debug/auto_enable_when_plugin_enabled'
+const SETTING_KEY_SEVER_ADDRESS := 'nbt_plugin/remote_debug/server_address'
+const SETTING_KEY_SEVER_PORT := 'nbt_plugin/remote_debug/server_port'
 
 var tool_menu:PopupMenu = null
 
@@ -41,6 +44,17 @@ func _exit_tree() -> void:
 
 func _ready() -> void:
 	connect('remote_node_selected', self, '_on_remote_node_selected')
+	
+	if ProjectSettings.has_setting(SETTING_KEY_ENABLE):
+		enable = ProjectSettings.get_setting(SETTING_KEY_ENABLE)
+	else:
+		ProjectSettings.set_setting(SETTING_KEY_ENABLE, enable)
+	if not ProjectSettings.has_setting(SETTING_KEY_DEBUG):
+		ProjectSettings.set_setting(SETTING_KEY_DEBUG, false)
+	if not ProjectSettings.has_setting(SETTING_KEY_SEVER_ADDRESS):
+		ProjectSettings.set_setting(SETTING_KEY_SEVER_ADDRESS, 'localhost')
+	if not ProjectSettings.has_setting(SETTING_KEY_SEVER_PORT):
+		ProjectSettings.set_setting(SETTING_KEY_SEVER_PORT, 45537)
 	
 	tool_menu.set_item_checked(TOOL_MENU_ENABLE_ID, enable)
 	if enable:
@@ -114,6 +128,10 @@ func on_enable():
 	get_plugin().add_autoload_singleton(REMOTE_DEBUG_CLIENT_AUTOLOAD_NAME, get_remote_debug_client_script_path())
 	
 	remote_debug_server = RemoteDebugServer.new()
+	
+	if ProjectSettings.has_setting(SETTING_KEY_SEVER_PORT):
+		remote_debug_server.port = ProjectSettings.get_setting(SETTING_KEY_SEVER_PORT)
+	
 	add_child(remote_debug_server)
 	remote_debug_server.connect('client_connected', self, '_on_client_connected')
 	remote_debug_server.connect('client_disconnected', self, '_on_client_disconnected')
@@ -153,7 +171,7 @@ func on_disable():
 	update_clients_submenu()
 
 func print_debug_msg(msg):
-	if debug:
+	if ProjectSettings.get_setting(SETTING_KEY_DEBUG):
 		print('[RemoteDebug]: %s' % msg)
 #----- Lambdas -----
 func __get_node_path_call_back(node_path):
@@ -306,8 +324,6 @@ func _on_take_screenshot():
 	p.queue_free()
 	
 	
-
-
 
 
 

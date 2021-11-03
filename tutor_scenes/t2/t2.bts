@@ -11,6 +11,8 @@ tree
 		timer wait: 1
 		show s: "Hello world!"
 		timer wait: 3
+		parallel
+			show s: "OK"
 
 
 

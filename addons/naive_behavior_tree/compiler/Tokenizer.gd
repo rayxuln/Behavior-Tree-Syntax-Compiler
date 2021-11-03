@@ -32,7 +32,7 @@ var Indent_fstate_list
 var next_token_queue:Array
 
 var has_error:bool
-var is_print_error:bool = true
+var is_print_error:bool = false
 var first_error:String
 var last_error:String
 
