@@ -144,9 +144,6 @@ class CustomBTNodeSymbol:
 		var source_path:String = compiler.source_path
 		script_path = path_token.value
 		
-		if script_path.is_rel_path():
-			script_path = '%s/%s' % [source_path.get_base_dir(), script_path]
-		
 		the_script = load(script_path)
 		if not the_script:
 			compiler.error(ScriptNotFoundError.new(path_token))
@@ -345,6 +342,8 @@ func init():
 	has_error = false
 	
 	add_importer('.gd', BTNodeImporter.new())
+	add_importer('.vs', BTNodeImporter.new())
+	add_importer('.gdns', BTNodeImporter.new())
 	
 	add_const_symbol('fail', BuiltInBTNodeSymbol.new(BTActionFail))
 	add_const_symbol('success', BuiltInBTNodeSymbol.new(BTActionSuccess))
@@ -447,6 +446,27 @@ func compile(source:String, _source_path:String = ''):
 	
 	return bt
 
+func trans_to_possible_suffix(path:String):
+	var extension = path.get_extension()
+	if not extension.empty():
+		return path
+	
+	var d = Directory.new()
+	var temp:String
+	for e in importer_table.keys():
+		temp = '%s%s' % [path, e]
+		if d.file_exists(temp):
+			return temp
+	
+	return path
+
+func trans_to_absolute_path(path:String):
+	if not path.is_rel_path():
+		return path
+	
+	return '%s/%s' % [source_path.get_base_dir(), path]
+	
+
 func compile_import_part(import_part):
 	for i in import_part.import_statement_list:
 		var id = i.id
@@ -455,6 +475,9 @@ func compile_import_part(import_part):
 		if symbol_table.has(id.value):
 			error(MultipleIDError.new(id))
 			continue
+		
+		path.value = trans_to_absolute_path(path.value)
+		path.value = trans_to_possible_suffix(path.value)
 		
 		var comma = path.value.find_last('.')
 		if comma >= 0:
@@ -470,7 +493,7 @@ func compile_import_part(import_part):
 			else:
 				error(ImportError.new('No importer to import "%s" with suffix \'%s\'' % [path.value, suffix], path))
 		else:
-			error(ImportError.new('Can\'t import "%s" with no suffix' % path.value, path))
+			error(ImportError.new('Can\'t infer the extension of "%s", so it\'s impossible to be imported.'  % path.value, path))
 		
 
 func compile_subtree_part(tree_part):

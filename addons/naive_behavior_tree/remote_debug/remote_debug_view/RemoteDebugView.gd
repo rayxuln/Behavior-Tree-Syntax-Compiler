@@ -16,6 +16,7 @@ var vertical_margin := 15.0
 
 onready var title_label = $VBoxContainer/HBoxContainer/TitleLabel
 onready var graph_edit = $VBoxContainer/GraphEdit
+onready var popup_menu = $PopupMenu
 
 func _ready() -> void:
 	connect('visibility_changed', self, '_on_visibility_changed')
@@ -210,3 +211,16 @@ func _on_request_open_script(path):
 
 func _on_ScreenShotButton_pressed() -> void:
 	emit_signal('request_screenshot')
+
+
+func _on_PopupMenu_id_pressed(id: int) -> void:
+	match id:
+		0:
+			sort_nodes()
+		2:
+			emit_signal('request_screenshot')
+
+
+func _on_GraphEdit_popup_request(position: Vector2) -> void:
+	popup_menu.rect_global_position = get_global_mouse_position()
+	popup_menu.popup()

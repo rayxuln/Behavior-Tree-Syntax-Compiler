@@ -3,7 +3,7 @@ extends Node
 
 signal remote_node_selected(id)
 
-const debug = true
+var debug = false
 
 const CaptureFuncObject = preload('./CaptureFuncObject.gd')
 
@@ -24,6 +24,8 @@ const REMOTE_DEBUG_VIEW_TITLE := 'NBT Remote Debug'
 
 const RemoteDebugView = preload('./remote_debug_view/RemoteDebugView.tscn')
 var remote_debug_view:Control
+
+const ProgressModelView = preload('./remote_debug_view/ProgressModelView.tscn')
 
 var remote_tree_np := @'/root/EditorNode/@@580/@@581/@@589/@@591/@@595/@@596/@@597/Scene/@@6782'
 
@@ -236,46 +238,69 @@ func _on_take_screenshot():
 		return
 	if remote_debug_view.db.data.empty():
 		return
+	
+	var theme = get_plugin().get_editor_interface().get_base_control().theme
+	
+	var p = ProgressModelView.instance()
+	add_child(p)
+	p.title.text = 'Taking screen shot please wait...'
+	p.theme = theme
+	var pb:ProgressBar = p.progress_bar
+	pb.max_value = 6
+	pb.value = 0
+	p.show_modal(true)
+		
 	var vp = Viewport.new()
 	add_child(vp)
 	vp.render_target_clear_mode = Viewport.CLEAR_MODE_ONLY_NEXT_FRAME
 	vp.render_target_update_mode = Viewport.UPDATE_ALWAYS
 	vp.render_target_v_flip = true
 	
-	print('start taking screenshot (1)')
+#	print('start taking screenshot (1)')
+	pb.value = 1
 	
 	yield(get_tree().create_timer(0.1), 'timeout')
-	print('setting up viewport (2)')
+#	print('setting up viewport (2)')
 	var temp_view = RemoteDebugView.instance()
 	vp.add_child(temp_view)
-	temp_view.theme = get_plugin().get_editor_interface().get_base_control().theme
+	temp_view.theme = theme
 	temp_view.get_node('VBoxContainer/HBoxContainer').visible = false
+	pb.value = 2
+	var graph_edit = temp_view.graph_edit as GraphEdit
+	graph_edit.get_child(0).visible = false
 	
 	yield(get_tree().create_timer(0.1), 'timeout')
-	print('setting up graph node view (3)')
+#	print('setting up graph node view (3)')
 	var data = remote_debug_view.db.data as Dictionary
 	temp_view.on_recieve_all_data(data)
 	var root = temp_view.obj_id_node_map[temp_view.db.get('root/obj_id')]
 	var ct_tree = temp_view.calc_tree_size(root)
-	vp.size = ct_tree.tree_size + Vector2(50, 50)
+	vp.size = ct_tree.tree_size + Vector2(20, 20)
 	
 	temp_view.show()
+	pb.value = 3
 	
 	yield(get_tree().create_timer(0.1), 'timeout')
-	print('adjust graph node view (4)')
-	var graph_edit = temp_view.graph_edit as GraphEdit
-	graph_edit.scroll_offset = Vector2(-10, -50)
+#	print('adjust graph node view (4)')
+	graph_edit.scroll_offset = Vector2(-10, -10)
 	graph_edit.minimap_enabled = false
+	graph_edit.use_snap = false
+	
+	pb.value = 4
 	
 	yield(get_tree().create_timer(0.1), 'timeout')
-	print('taking image data (5)')
+#	print('taking image data (5)')
 	var img = vp.get_texture().get_data() as Image
 	img.save_png('res://nbt_screen_shot.png')
+	pb.value = 5
 	
 	yield(get_tree().create_timer(0.1), 'timeout')
-	print('done! (6)')
+#	print('done! (6)')
 	vp.queue_free()
+	pb.value = 6
 	
+	yield(get_tree().create_timer(0.1), 'timeout')
+	p.queue_free()
 	
 	
 

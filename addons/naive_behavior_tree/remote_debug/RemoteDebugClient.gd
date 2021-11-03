@@ -2,7 +2,7 @@ extends Node
 
 signal server_message(peer, data)
 
-var debug := true
+var debug := false
 
 var address := 'localhost'
 var port := 45537

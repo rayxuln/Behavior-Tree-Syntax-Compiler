@@ -1,5 +1,5 @@
 
-import show: "res://tutor_scenes/t2/show.gd"
+import show
 
 tree
 	sequence

@@ -32,6 +32,18 @@ var keyword_list := [
 	
 	'true',
 	'false',
+	
+	'policy',
+	'SEQUENCE',
+	'SELECTOR',
+	
+	'orchestrator',
+	'RESUME',
+	'JOIN',
+	
+	'wait',
+	'success_posibility',
+	'times',
 ]
 
 onready var container:VBoxContainer = $VBoxContainer

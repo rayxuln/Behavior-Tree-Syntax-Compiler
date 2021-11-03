@@ -1,0 +1,76 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeParallel.gd" type="Script" id=1]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeRandomSelector.gd" type="Script" id=2]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/actions/BTActionTimer.gd" type="Script" id=3]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/BehaviorTree.gd" type="Script" id=4]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/classes/composites/BTCompositeSequence.gd" type="Script" id=5]
+[ext_resource path="res://addons/naive_behavior_tree/behavior_tree/lib/test/Print.gd" type="Script" id=6]
+
+[node name="BehaviorTreeTest" type="Node"]
+script = ExtResource( 4 )
+guard_path = NodePath("")
+enable = true
+resume_mode = 0
+agent_path = NodePath("")
+root_path = NodePath("sequence")
+process_mode = 1
+
+[node name="sequence" type="Node" parent="."]
+script = ExtResource( 5 )
+guard_path = NodePath("")
+
+[node name="print_123 [parallel]" type="Node" parent="sequence"]
+script = ExtResource( 1 )
+guard_path = NodePath("")
+policy = 0
+orchestrator = 1
+
+[node name="print" type="Node" parent="sequence/print_123 [parallel]"]
+script = ExtResource( 6 )
+guard_path = NodePath("")
+msg = "1"
+
+[node name="@print@21" type="Node" parent="sequence/print_123 [parallel]"]
+script = ExtResource( 6 )
+guard_path = NodePath("")
+msg = "2"
+
+[node name="@print@22" type="Node" parent="sequence/print_123 [parallel]"]
+script = ExtResource( 6 )
+guard_path = NodePath("")
+msg = "3"
+
+[node name="timer" type="Node" parent="sequence"]
+script = ExtResource( 3 )
+guard_path = NodePath("")
+wait = 1.0
+
+[node name="print" type="Node" parent="sequence"]
+script = ExtResource( 6 )
+guard_path = NodePath("")
+msg = "a"
+
+[node name="@timer@23" type="Node" parent="sequence"]
+script = ExtResource( 3 )
+guard_path = NodePath("")
+wait = 1.0
+
+[node name="random_selector" type="Node" parent="sequence"]
+script = ExtResource( 2 )
+guard_path = NodePath("")
+
+[node name="print" type="Node" parent="sequence/random_selector"]
+script = ExtResource( 6 )
+guard_path = NodePath("")
+msg = "b"
+
+[node name="@print@24" type="Node" parent="sequence/random_selector"]
+script = ExtResource( 6 )
+guard_path = NodePath("")
+msg = "c"
+
+[node name="@timer@25" type="Node" parent="sequence"]
+script = ExtResource( 3 )
+guard_path = NodePath("")
+wait = 1.0

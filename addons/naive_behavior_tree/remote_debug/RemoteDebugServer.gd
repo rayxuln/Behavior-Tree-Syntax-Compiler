@@ -12,7 +12,7 @@ var server:TCP_Server
 
 var clients := {}
 
-var debug := true
+var debug := false
 
 var current_peer:PacketPeerStream = null
 

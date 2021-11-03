@@ -317,7 +317,7 @@ func _import_statement(import_part):
 	var id_token = match_id()
 	match_blank_or_null()
 	var string_token = id_token.to_string_token()
-	string_token.value = '%s.gd' % string_token.value
+	string_token.value = '%s' % string_token.value
 	
 	var token = tokenizer.preview_next()
 	if token.value == ':':
