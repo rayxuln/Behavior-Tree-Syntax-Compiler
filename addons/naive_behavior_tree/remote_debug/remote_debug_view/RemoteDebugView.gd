@@ -49,8 +49,10 @@ func update_content():
 	if db.data.root != null:
 		create_tree(db.data.root)
 	
-	sort_nodes()
 	update_connections()
+	
+	yield(get_tree(), 'idle_frame')
+	sort_nodes()
 
 func get_status_text(s):
 	match s:

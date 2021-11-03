@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/naive_behavior_tree/remote_debug/remote_debug_view/ParameterView.gd" type="Script" id=1]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 3.0
+content_margin_right = 3.0
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color( 0.12549, 0.141176, 0.192157, 1 )
+
+[node name="ParameterView" type="PanelContainer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -80.5
+margin_top = -12.5
+margin_right = 80.5
+margin_bottom = 12.5
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 164.0
+margin_bottom = 27.0
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+margin_top = 3.0
+margin_right = 106.0
+margin_bottom = 17.0
+size_flags_horizontal = 3
+text = "parameter name"
+valign = 1
+
+[node name="Label2" type="Label" parent="HBoxContainer"]
+margin_left = 110.0
+margin_right = 157.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+custom_styles/normal = SubResource( 1 )
+text = "values"

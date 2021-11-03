@@ -29,7 +29,7 @@ const ProgressModelView = preload('./remote_debug_view/ProgressModelView.tscn')
 
 var remote_tree_np := @'/root/EditorNode/@@580/@@581/@@589/@@591/@@595/@@596/@@597/Scene/@@6782'
 
-var enable := true
+var enable := false
 
 func _enter_tree() -> void:
 	get_plugin().add_tool_submenu_item(TOOL_MENU_NAME, create_tool_item())
@@ -273,11 +273,14 @@ func _on_take_screenshot():
 #	print('setting up graph node view (3)')
 	var data = remote_debug_view.db.data as Dictionary
 	temp_view.on_recieve_all_data(data)
+	temp_view.show()
+	
+	yield(get_tree().create_timer(0.5), 'timeout')
 	var root = temp_view.obj_id_node_map[temp_view.db.get('root/obj_id')]
 	var ct_tree = temp_view.calc_tree_size(root)
 	vp.size = ct_tree.tree_size + Vector2(20, 20)
 	
-	temp_view.show()
+	
 	pb.value = 3
 	
 	yield(get_tree().create_timer(0.1), 'timeout')

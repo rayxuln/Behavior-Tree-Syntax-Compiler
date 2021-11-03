@@ -32,6 +32,7 @@ func _on_set_status(v):
 	update()
 
 onready var script_button = $ScriptButton
+onready var param_container = $ParameterContainer
 
 var builtin_node_name_map := {
 	'BTActionFail': 'Fail',
@@ -78,11 +79,16 @@ func set_data(node_data):
 	title = source_data.name
 	status = source_data.status
 	update_script_button()
+	if node_data.has('params'):
+		param_container.set_data(node_data.params)
+	update()
 
 func update_data(node_data:Dictionary):
 	for k in node_data.keys():
 		if source_data.has(k):
 			source_data[k] = node_data[k]
+			if k == 'params':
+				param_container.update_data(node_data.params)
 	title = source_data.name
 	status = source_data.status
 	update_script_button()

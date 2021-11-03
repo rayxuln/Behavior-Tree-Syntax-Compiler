@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://addons/naive_behavior_tree/remote_debug/remote_debug_view/NBTGraphNode.gd" type="Script" id=1]
+[ext_resource path="res://addons/naive_behavior_tree/remote_debug/remote_debug_view/ParameterContainer.gd" type="Script" id=2]
 
 [sub_resource type="StyleBoxFlat" id=1]
 draw_center = false
@@ -70,6 +71,12 @@ slot/2/left_color = Color( 1, 1, 1, 1 )
 slot/2/right_enabled = false
 slot/2/right_type = 0
 slot/2/right_color = Color( 1, 1, 1, 1 )
+slot/3/left_enabled = false
+slot/3/left_type = 0
+slot/3/left_color = Color( 1, 1, 1, 1 )
+slot/3/right_enabled = false
+slot/3/right_type = 0
+slot/3/right_color = Color( 1, 1, 1, 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -112,5 +119,13 @@ margin_top = 62.0
 margin_right = 176.0
 margin_bottom = 82.0
 text = "Click to open the Script"
+
+[node name="ParameterContainer" type="VBoxContainer" parent="."]
+margin_left = 16.0
+margin_top = 87.0
+margin_right = 176.0
+margin_bottom = 87.0
+custom_constants/separation = 0
+script = ExtResource( 2 )
 
 [connection signal="pressed" from="ScriptButton" to="." method="_on_ScriptButton_pressed"]

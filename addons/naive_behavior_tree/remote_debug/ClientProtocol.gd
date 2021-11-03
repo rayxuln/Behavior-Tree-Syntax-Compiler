@@ -3,6 +3,10 @@ extends './RemoteDebugProtocol.gd'
 
 signal set_current_behavior_tree(bt)
 
+const excluded_param := [
+	'guard_path',
+]
+
 func get_event_name_list():
 	return .get_event_name_list() + [
 	]
@@ -53,7 +57,16 @@ func gen_tree_node_data(node:BTNode, single := false):
 	if not single:
 		res.guard =  gen_tree_data(guard) if guard else null
 		res.children = []
+		gen_tree_node_parameter_data(node, res)
 	return res
+
+func gen_tree_node_parameter_data(node:BTNode, btn_data):
+	var pd := {}
+	for p in node.get_property_list():
+		if p.has('usage') and p.usage == (PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_DEFAULT):
+			if not p.name in excluded_param:
+				pd[p.name] = node.get(p.name)
+	btn_data['params'] = pd
 
 func gen_tree_data(node:BTNode):
 	var data = gen_tree_node_data(node)
