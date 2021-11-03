@@ -16,11 +16,9 @@ export(NodePath) var guard_path
 var guard:Node = null
 var status = FRESH setget _on_set_status
 func _on_set_status(v):
-	var old = status
 	status = v
-	if status != old:
-		if tree:
-			tree.emit_signal('task_status_changed', self)
+	if tree:
+		tree.emit_signal('task_status_changed', self)
 
 func _ready() -> void:
 	if Engine.editor_hint:

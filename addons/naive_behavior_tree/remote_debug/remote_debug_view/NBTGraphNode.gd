@@ -28,11 +28,15 @@ enum BTNStatus {
 }
 export(BTNStatus) var status = BTNode.FRESH setget _on_set_status
 func _on_set_status(v):
+	if v == BTNStatus.Succeeded:
+		highlight_color.a = 1.0
 	status = v
 	update()
 
 onready var script_button = $ScriptButton
 onready var param_container = $ParameterContainer
+
+var highlight_color := Color(1, 1, 1, 0)
 
 var builtin_node_name_map := {
 	'BTActionFail': 'Fail',
@@ -72,12 +76,17 @@ func _notification(what: int) -> void:
 					draw_style_box(get_stylebox('succeeded'), Rect2(Vector2.ZERO, rect_size))
 				BTNode.CANCELLED:
 					draw_style_box(get_stylebox('cancelled'), Rect2(Vector2.ZERO, rect_size))
+			draw_rect(Rect2(Vector2.ZERO, rect_size), highlight_color, false, 3)
 
+func _process(delta: float) -> void:
+	if highlight_color.a > 0:
+		highlight_color.a = lerp(highlight_color.a, 0, 0.03)
+		update()
 #----- Methods -----
 func set_data(node_data):
 	source_data = node_data
 	title = source_data.name
-	status = source_data.status
+	self.status = source_data.status
 	update_script_button()
 	if node_data.has('params'):
 		param_container.set_data(node_data.params)
@@ -90,7 +99,7 @@ func update_data(node_data:Dictionary):
 			if k == 'params':
 				param_container.update_data(node_data.params)
 	title = source_data.name
-	status = source_data.status
+	self.status = source_data.status
 	update_script_button()
 	update()
 
