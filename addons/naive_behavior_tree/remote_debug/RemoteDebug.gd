@@ -30,7 +30,10 @@ var remote_debug_view:Control
 
 const ProgressModelView = preload('./remote_debug_view/ProgressModelView.tscn')
 
-var remote_tree_np := @'/root/EditorNode/@@580/@@581/@@589/@@591/@@595/@@596/@@597/Scene/@@6782'
+var remote_tree_np_list := [
+	@'/root/EditorNode/@@592/@@593/@@601/@@603/@@607/@@608/@@609/Scene/@@6996',
+	@'/root/EditorNode/@@580/@@581/@@589/@@591/@@595/@@596/@@597/Scene/@@6782',
+]
 
 var enable := false
 
@@ -61,6 +64,33 @@ func _ready() -> void:
 		on_enable()
 
 #----- Methods -----
+func _find_scene_dock(node:Node):
+	if node.name == tr('Scene'):
+		return node
+	
+	for c in node.get_children():
+		var n = _find_scene_dock(c)
+		if n:
+			return n
+	
+	return null
+func find_remote_tree():
+	for p in remote_tree_np_list:
+		var n = get_node_or_null(p)
+		if n:
+			return n
+	
+	var scene:Node = _find_scene_dock(get_plugin().get_editor_interface().get_base_control())
+	if scene == null:
+		printerr('Can\'t even find the scene dock, no remote debug available!')
+		return
+	
+	for c in scene.get_children():
+		if c is Tree:
+			return c
+	
+	return null
+
 func create_tool_item():
 	if tool_menu == null:
 		tool_menu = PopupMenu.new()
@@ -76,7 +106,7 @@ func get_plugin() -> EditorPlugin:
 
 
 func get_remote_tree() -> Tree:
-	return get_node_or_null(remote_tree_np) as Tree
+	return find_remote_tree() as Tree
 
 func get_remote_debug_client_script_path():
 	var p = preload(REMOTE_DEBUG_CLIENT_PATH)
@@ -122,7 +152,8 @@ func update_clients_submenu(removed_peer := null):
 func on_enable():
 	var tree = get_remote_tree()
 	if tree == null:
-		printerr('The remote tree is not available, may due to the path has been changed. Disabling...')
+		printerr('Can\'t not find the remote tree. Disabling...')
+		enable = false
 		return
 	tree.connect('item_activated', self, '_on_remote_tree_item_doubleclicked')
 	get_plugin().add_autoload_singleton(REMOTE_DEBUG_CLIENT_AUTOLOAD_NAME, get_remote_debug_client_script_path())
